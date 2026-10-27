@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>E2E 자율주행 Simulation Pipeline</title>
+<meta name="description" content="E2E 자율주행 시뮬레이션 파이프라인: 연구 질문, 항목별 설명, Related Works">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#1E2733; --muted:#5B6573; --rule:#D3D9E0;
+  --tree:#A3ACB7; --link:#334155; --prop:#C2410C;
+  --tech-bg:#26313F; --tech-ink:#FFFFFF; --tech-sub:#C9D3DF;
+  --wm-bg:#4B2A7B; --wm-ink:#FFFFFF;
+  --root-bg:#1E2733; --root-ink:#FFFFFF;
+  --mark:#B45309;
+  --c-s_ol:#0E7C66; --c-s_cl:#4F46B8; --c-s_req:#B4581A; --c-s_eval:#B3264A; --c-s_aug:#3C7A1E;
+  --font:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#12161C; --surface:#1A2029; --ink:#E6EAF0; --muted:#A0AAB8; --rule:#2E3744;
+    --tree:#4A5563; --link:#A9B6C6; --prop:#F08A4B;
+    --tech-bg:#C8D2DE; --tech-ink:#12161C; --tech-sub:#3A4656;
+    --wm-bg:#C7AEF0; --wm-ink:#1B1030;
+    --root-bg:#E6EAF0; --root-ink:#12161C;
+    --mark:#F2B25C;
+    --c-s_ol:#3CC4A4; --c-s_cl:#9B95F0; --c-s_req:#F0965A; --c-s_eval:#F0708D; --c-s_aug:#8CCB66;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#12161C; --surface:#1A2029; --ink:#E6EAF0; --muted:#A0AAB8; --rule:#2E3744;
+  --tree:#4A5563; --link:#A9B6C6; --prop:#F08A4B;
+  --tech-bg:#C8D2DE; --tech-ink:#12161C; --tech-sub:#3A4656;
+  --wm-bg:#C7AEF0; --wm-ink:#1B1030;
+  --root-bg:#E6EAF0; --root-ink:#12161C;
+  --mark:#F2B25C;
+  --c-s_ol:#3CC4A4; --c-s_cl:#9B95F0; --c-s_req:#F0965A; --c-s_eval:#F0708D; --c-s_aug:#8CCB66;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;word-break:keep-all;overflow-wrap:anywhere;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.6}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:2px solid var(--link);outline-offset:3px;border-radius:2px}
+.wrap{max-width:1320px;margin:0 auto;padding:28px 24px 64px}
+header.top{display:flex;flex-wrap:wrap;gap:16px 40px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+h1{font-size:clamp(24px,3vw,34px);line-height:1.2;margin:0;font-weight:700;letter-spacing:-0.01em}
+.lede{margin:6px 0 0;color:var(--muted);max-width:62ch}
+.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:var(--muted);margin:0;padding:0;list-style:none}
+.legend li{display:flex;align-items:center;gap:8px}
+.legend svg{flex:none}
+
+/* figure */
+.figure{background:var(--surface);border:1px solid var(--rule);border-radius:6px;overflow-x:auto}
+.figure svg{display:block;width:100%;min-width:980px;height:auto}
+.band{opacity:.09}
+.seg{fill:none;stroke-width:1.4;transition:opacity .15s}
+.seg.tree{stroke:var(--tree);stroke-width:1.1}
+.seg.link{stroke:var(--link)}
+.seg.prop{stroke:var(--prop);stroke-dasharray:6 4}
+svg.focusing .seg{opacity:.15}
+svg.focusing .seg.on{opacity:1;stroke-width:2.4}
+svg.focusing .node{opacity:.35}
+svg.focusing .node.on{opacity:1}
+.node{cursor:pointer;transition:opacity .15s}
+.node rect{transition:stroke-width .15s}
+.node:hover rect,.node:focus-visible rect{stroke-width:2.5}
+.node:focus{outline:none}
+.node:focus-visible rect{stroke:var(--link)}
+.nl{overflow-wrap:normal;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;font-family:var(--font);line-height:1.22;padding:0 7px;overflow:hidden}
+.nl.c{align-items:center;text-align:center}
+.nl b{font-weight:700}
+.nl .t{font-size:11.5px}
+.nl .s{font-size:10.5px;font-weight:700}
+.nl .q{font-size:10.5px;color:var(--muted)}
+.nl .rq{font-weight:700;margin-right:5px}
+.n-task .nl,.n-scene .nl{color:var(--ink)}
+.n-tech .nl{color:var(--tech-ink)} .n-tech .s{color:var(--tech-sub);font-weight:500}
+.n-wm .nl{color:var(--wm-ink)} .n-wm .s{font-weight:500;opacity:.85}
+.n-root .nl{color:var(--root-ink)}
+.figure.compact svg{min-width:760px}
+
+/* home sections */
+h2{font-size:22px;line-height:1.3;margin:48px 0 6px}
+.sub{color:var(--muted);margin:0 0 18px;max-width:70ch}
+.rqlist{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.rqlist li{display:grid;grid-template-columns:76px 1fr;gap:4px 20px;padding:18px 0;border-bottom:1px solid var(--rule)}
+.rqtag{font-weight:700;font-size:20px;color:var(--c)}
+.rqlist a.q{font-size:18px;font-weight:500;text-decoration:none;line-height:1.45}
+.rqlist a.q:hover{text-decoration:underline}
+.rqlist .meta{grid-column:2;color:var(--muted);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0;padding:0;list-style:none}
+.chip{display:inline-block;font-size:13.5px;padding:3px 10px;border:1px solid var(--rule);border-radius:999px;text-decoration:none;background:var(--surface)}
+.chip:hover{border-color:var(--ink)}
+.chip.sec{border-color:var(--c);color:var(--c);font-weight:700}
+
+/* detail */
+.crumbs{font-size:14px;color:var(--muted);margin:0 0 18px}
+.crumbs a{color:var(--muted)}
+.detail{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start}
+@media (max-width:900px){.detail{grid-template-columns:1fr}}
+.kicker{font-size:15px;font-weight:700;color:var(--c);margin:0}
+.detail h1{margin:4px 0 4px}
+.detail .subt{font-size:17px;color:var(--muted);margin:0 0 20px}
+.rqbox{border:1.5px solid var(--c);border-radius:6px;padding:14px 18px;margin:0 0 22px;background:var(--surface)}
+.rqbox a{text-decoration:none}
+.rqbox .rqtag{font-size:15px}
+.rqbox p{margin:2px 0 0;font-size:17px;font-weight:500}
+.problem{margin:0 0 22px}
+.problem h3,.side h3,.works h3{font-size:15px;margin:0 0 6px;color:var(--muted);font-weight:700}
+.problem p{margin:0;font-size:18px;line-height:1.55;max-width:60ch}
+.desc{max-width:66ch;margin:0 0 28px}
+.side{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:16px 18px}
+.side section+section{margin-top:16px;padding-top:14px;border-top:1px solid var(--rule)}
+.side ul{list-style:none;margin:0;padding:0}
+.side li+li{margin-top:6px}
+.side a{text-decoration:none}
+.side a:hover{text-decoration:underline}
+.dir{color:var(--muted);font-size:13px;margin-right:6px}
+.works ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.works li{padding:14px 0;border-bottom:1px solid var(--rule)}
+.works .pt{font-weight:500;font-size:16.5px;text-decoration:none;line-height:1.4}
+.works .pt:hover{text-decoration:underline}
+.works .pv{font-size:13.5px;color:var(--muted);margin-left:8px;white-space:nowrap}
+.works .pn{margin:4px 0 0;font-size:14.5px;color:var(--muted);max-width:72ch}
+.badge{display:inline-block;font-size:12px;font-weight:700;color:var(--mark);border:1px solid var(--mark);border-radius:3px;padding:0 6px;margin-right:8px;vertical-align:2px}
+.plist{margin:0 0 28px;padding-left:1.2em;max-width:66ch}
+.plist li{margin:4px 0;font-size:17px}
+.tasks{list-style:none;margin:0 0 28px;padding:0;border-top:1px solid var(--rule)}
+.tasks li{padding:12px 0;border-bottom:1px solid var(--rule)}
+.tasks a{font-weight:700;text-decoration:none}
+.tasks a:hover{text-decoration:underline}
+.tasks p{margin:2px 0 0;color:var(--muted);font-size:15px}
+.note{font-size:14px;color:var(--muted);margin-top:40px;max-width:80ch}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* tabs */
+.dhead{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px 24px}
+.stpill{font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;border:1.5px solid var(--st);color:var(--st);white-space:nowrap;margin-top:8px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--rule);margin:18px 0 26px;overflow-x:auto}
+.tabs a{padding:10px 16px;text-decoration:none;color:var(--muted);font-weight:500;border-bottom:2.5px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs a:hover{color:var(--ink)}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--c);font-weight:700}
+.tabs .cnt{font-size:12px;color:var(--muted);margin-left:4px}
+/* works toolbar */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:0 0 14px}
+.segbtn{display:inline-flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.segbtn button{font:inherit;font-size:14px;background:var(--surface);color:var(--muted);border:0;padding:6px 12px;cursor:pointer}
+.segbtn button+button{border-left:1px solid var(--rule)}
+.segbtn button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+input[type=search],input[type=text],input[type=number],input[type=url],select,textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:5px;padding:7px 10px;width:100%}
+textarea{min-height:90px;resize:vertical}
+.toolbar input[type=search]{max-width:280px}
+.works li{display:grid;grid-template-columns:auto 1fr;gap:0 12px}
+.works li .rd{padding-top:3px}
+.works li.read .pt{color:var(--muted)}
+.btn{font:inherit;font-size:14px;font-weight:500;padding:7px 14px;border-radius:5px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.small{font-size:13px;padding:2px 9px;margin-left:8px}
+.addform{display:grid;grid-template-columns:1fr 160px;gap:10px;margin-top:22px;padding:16px;border:1px dashed var(--rule);border-radius:6px}
+.addform .full{grid-column:1/-1}
+.addform h3{grid-column:1/-1;margin:0}
+@media (max-width:640px){.addform{grid-template-columns:1fr}}
+.empty{color:var(--muted);padding:16px 0}
+/* config */
+.cfg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:36px;align-items:start}
+@media (max-width:960px){.cfg{grid-template-columns:1fr}}
+.field{margin:0 0 16px}
+.field label.l{display:block;font-weight:500;font-size:14.5px;margin-bottom:5px}
+.field .u{color:var(--muted);font-size:13px;margin-left:6px;font-weight:400}
+.field .h{font-size:13px;color:var(--muted);margin:4px 0 0}
+.field .opts{display:flex;flex-wrap:wrap;gap:8px 16px}
+.field .opts label{display:flex;gap:6px;align-items:center;font-size:15px}
+.numrow{display:flex;align-items:center;gap:8px}.numrow input{max-width:180px}
+fieldset{border:0;padding:0;margin:0 0 22px}
+legend{font-size:15px;font-weight:700;color:var(--muted);padding:0;margin-bottom:12px}
+.preview{position:sticky;top:16px;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:14px}
+.preview pre{margin:0 0 12px;font-size:13px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre}
+.preview .acts{display:flex;flex-wrap:wrap;gap:8px}
+.saved{font-size:13px;color:var(--muted);margin-left:auto;align-self:center}
+table.prog{width:100%;border-collapse:collapse;font-size:15px}
+.prog th{text-align:left;font-size:13px;color:var(--muted);font-weight:700;padding:8px 10px 8px 0;border-bottom:1px solid var(--rule)}
+.prog td{padding:9px 10px 9px 0;border-bottom:1px solid var(--rule);vertical-align:middle}
+.prog select,.prog input{font-size:14px;padding:5px 8px}
+.bar{height:8px;border-radius:4px;background:var(--rule);overflow:hidden;margin:6px 0 20px;max-width:420px}
+.bar i{display:block;height:100%;background:var(--c)}
+.tw{overflow-x:auto}
+.manage{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+.mode{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.mode i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.mode.db i{background:#2E7D32}
+.doc section{margin:0 0 22px;max-width:68ch}
+.doc h3{font-size:15px;color:var(--muted);margin:0 0 4px;font-weight:700}
+.doc p{margin:0;font-size:16.5px;line-height:1.7;white-space:pre-wrap}
+.doc p.empty{color:var(--muted);font-style:italic}
+.docbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 20px}
+.meta2{font-size:13px;color:var(--muted)}
+.edited{font-size:12px;font-weight:700;color:var(--mark);margin-left:6px}
+.docedit .field textarea{min-height:110px}
+.hist{list-style:none;margin:0;padding:0}
+.hist li{padding:8px 0;border-bottom:1px solid var(--rule);font-size:14px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.hist li:last-child{border-bottom:0}
+.ro{font-size:13px;color:var(--muted);border:1px solid var(--rule);border-radius:4px;padding:2px 8px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:6px;font-size:14px;z-index:20;max-width:90vw}
+.doc ul.mdl{margin:0;padding-left:1.2em;max-width:68ch}.doc ul.mdl li{font-size:16.5px;line-height:1.7}
+.doc h4{font-size:15px;margin:10px 0 4px}.doc code{font-size:.9em;background:var(--rule);padding:1px 4px;border-radius:3px}
+.doc p+p{margin-top:8px}
+a.btn{text-decoration:none;display:inline-block}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+let D, PAPERS = [], PROG = {}, byId = {}, REPO = "";
+const app = document.getElementById("app");
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const STATUS = ["미착수", "조사", "구현", "검증", "완료"];
+const STC = { "미착수": "var(--muted)", "조사": "#2F6FB5", "구현": "#B4581A", "검증": "#7B3FB0", "완료": "#2E7D32" };
+const GH = () => `https://github.com/${REPO}`;
+const secOf = id => D.sections.find(s => s.id === id);
+
+/* ---------- personal storage (this browser only) ---------- */
+const KEY = "simpipe-site:v1";
+let ME = { read: {}, cfg: {}, note: {} };
+try { const r = localStorage.getItem(KEY); if (r) ME = { ...ME, ...JSON.parse(r) }; } catch (e) {}
+const saveMe = () => { try { localStorage.setItem(KEY, JSON.stringify(ME)); } catch (e) {} const el = document.querySelector(".saved"); if (el) el.textContent = "저장됨 · 이 브라우저"; };
+
+/* ---------- loading ---------- */
+const docCache = {};
+async function getDoc(id) {
+  if (docCache[id] !== undefined) return docCache[id];
+  try { const r = await fetch(`docs/${id}.md`, { cache: "no-cache" }); docCache[id] = r.ok ? await r.text() : ""; } catch (e) { docCache[id] = ""; }
+  return docCache[id];
+}
+function parseDoc(md) {
+  const out = []; let cur = null;
+  for (const line of md.split("\n")) {
+    if (/^## /.test(line)) { cur = { h: line.slice(3).trim(), body: [] }; out.push(cur); }
+    else if (cur) cur.body.push(line);
+  }
+  return out.map(s => ({ h: s.h, body: s.body.join("\n").trim() }));
+}
+function mdInline(s) {
+  return esc(s).replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/(^|[^*])_([^_]+)_(?!\w)/g, "$1<i>$2</i>").replace(/`([^`]+)`/g, "<code>$1</code>");
+}
+function mdBlock(md) {
+  const blocks = md.split(/\n\s*\n/); let h = "";
+  for (const b of blocks) {
+    const lines = b.split("\n").filter(l => l.trim());
+    if (!lines.length) continue;
+    if (lines.every(l => /^\s*[-*] /.test(l))) h += "<ul class='mdl'>" + lines.map(l => `<li>${mdInline(l.replace(/^\s*[-*] /, ""))}</li>`).join("") + "</ul>";
+    else if (/^### /.test(lines[0])) h += `<h4>${mdInline(lines[0].slice(4))}</h4>` + (lines.length > 1 ? `<p>${lines.slice(1).map(mdInline).join("<br>")}</p>` : "");
+    else h += `<p>${lines.map(mdInline).join("<br>")}</p>`;
+  }
+  return h;
+}
+let commitsCache = {};
+async function commitsFor(p, n = 6) {
+  const k = p + n; if (commitsCache[k]) return commitsCache[k];
+  try { const r = await fetch(`https://api.github.com/repos/${REPO}/commits?path=${encodeURIComponent(p)}&per_page=${n}`); commitsCache[k] = r.ok ? await r.json() : []; }
+  catch (e) { commitsCache[k] = []; }
+  return commitsCache[k];
+}
+
+/* ---------- helpers ---------- */
+const statusOf = id => (PROG[id] && PROG[id].status) || "미착수";
+const ownerOf = id => (PROG[id] && PROG[id].owner) || "";
+const treeKids = id => D.edges.filter(e => e[0] === id && e[2] === "tree").map(e => e[1]);
+const sectionMembers = id => { const k = treeKids(id); return k.concat(k.flatMap(treeKids)); };
+const sectionTech = id => { const all = sectionMembers(id); return [...new Set(D.edges.filter(e => all.includes(e[0]) && ["tech", "wm"].includes(byId[e[1]].kind)).map(e => e[1]))]; };
+function relSections(id) {
+  const n = byId[id]; if (n.sec) return [n.sec];
+  const seen = new Set([id]), out = new Set(); let fr = [id];
+  for (let h = 0; h < 2; h++) { const nx = [];
+    for (const f of fr) for (const [a, b] of D.edges) { const o = a === f ? b : b === f ? a : null; if (!o || seen.has(o)) continue; seen.add(o);
+      if (byId[o].sec && byId[o].kind !== "section") out.add(byId[o].sec); else if (["tech", "wm"].includes(byId[o].kind)) nx.push(o); }
+    fr = nx; }
+  return [...out];
+}
+const refsFor = id => Object.keys(D.refs).filter(k => D.refs[k].applies.includes(id));
+const hrefOf = (id, tab) => id === "root" ? "#home" : `#${({ section: "s", ref: "r" })[byId[id].kind] || "n"}.${id}${tab ? "." + tab : ""}`;
+function paperList(id) {
+  const ids = byId[id].kind === "section" ? new Set([...sectionMembers(id), ...sectionTech(id)]) : new Set([id]);
+  const rank = p => p.tag === "designated" ? 2 : p.tag === "reference" ? 0 : 1;
+  return PAPERS.filter(p => p.nodes.some(n => ids.has(n))).sort((a, b) => rank(b) - rank(a));
+}
+function cfgOf(id) { const o = {}; for (const f of D.cfg[id] || []) o[f.k] = Array.isArray(f.d) ? [...f.d] : f.d; return { ...o, ...(ME.cfg[id] || {}) }; }
+const fmt = t => t ? new Date(t).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }) : "";
+let toastT; function toast(t) { let el = document.querySelector(".toast"); if (!el) { el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); } el.textContent = t; clearTimeout(toastT); toastT = setTimeout(() => el.remove(), 3000); }
+function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: type + ";charset=utf-8" })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0); }
+async function copy(text, btn) { try { await navigator.clipboard.writeText(text); } catch (e) {} const o = btn.textContent; btn.textContent = "복사됨"; setTimeout(() => btn.textContent = o, 1200); }
+const issueUrl = (id) => `${GH()}/issues/new?template=add-paper.yml&labels=paper` + (byId[id] && byId[id].kind !== "section" ? `&paper_nodes=${encodeURIComponent(id + " — " + byId[id].label + (byId[id].kind === "ref" ? " (참고자료)" : ""))}` : "");
+
+/* ---------- figure ---------- */
+function svgFigure(focusId) {
+  let s = `<svg viewBox="24 84 1240 616" role="img" aria-label="시뮬레이션 파이프라인 다이어그램" class="${focusId ? "focusing" : ""}">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--link)"/></marker>
+  <marker id="ahp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--prop)"/></marker></defs>`;
+  for (const b of D.bands) s += `<rect class="band" x="154" y="${b.y}" width="1099" height="${b.h}" fill="var(--c-${b.id})"/>`;
+  for (const g of D.segs) { const on = focusId && g.ids.includes(focusId) ? " on" : ""; const m = g.arrow ? ` marker-end="url(#${g.cls === "prop" ? "ahp" : "ah"})"` : "";
+    s += `<polyline class="seg ${g.cls}${on}" data-ids="${g.ids.join(" ")}" points="${g.pts.map(p => p.join(",")).join(" ")}"${m}/>`; }
+  const order = ["root", ...D.sections.map(x => x.id), ...D.nodes.filter(n => n.id !== "root").map(n => n.id)];
+  const nbrs = new Set(focusId ? D.segs.filter(g => g.ids.includes(focusId)).flatMap(g => g.ids) : []);
+  for (const id of order) {
+    const n = byId[id], p = D.px[id], k = n.kind, sc = n.sec ? `var(--c-${n.sec})` : null;
+    let fill = "var(--surface)", stroke = "var(--rule)", sw = 1, inner;
+    if (k === "root") { fill = "var(--root-bg)"; stroke = fill; inner = `<div class="nl c"><b style="font-size:16px">Simulation</b></div>`; }
+    else if (k === "section") { stroke = sc; sw = 2; inner = `<div class="nl"><div class="t"><span class="rq" style="color:${sc}">${n.rq}</span><b>${esc(n.label)}</b></div><div class="q">${esc(n.short)}</div></div>`; }
+    else if (k === "task" || k === "scene") { if (k === "scene") { stroke = sc; sw = 1.4; } inner = `<div class="nl c"><div class="t">${k === "scene" ? "<b>" + esc(n.label) + "</b>" : esc(n.label)}</div>${n.sub ? `<div class="s" style="color:${sc}">${esc(n.sub)}</div>` : ""}</div>`; }
+    else { fill = k === "wm" ? "var(--wm-bg)" : "var(--tech-bg)"; stroke = fill; inner = `<div class="nl c"><div class="t"><b style="font-size:${k === "wm" ? 14 : 12}px">${esc(n.label)}</b></div>${n.sub ? `<div class="s">${k === "wm" ? esc(n.sub).replace(" · ", "<br/>") : esc(n.sub)}</div>` : ""}</div>`; }
+    const on = focusId && (id === focusId || nbrs.has(id)) ? " on" : "", st = statusOf(id);
+    const dot = k !== "root" && st !== "미착수" ? `<circle cx="${p.x + p.w - 7}" cy="${p.y + 7}" r="4.5" fill="${STC[st]}" stroke="var(--surface)" stroke-width="1.5"><title>${st}</title></circle>` : "";
+    s += `<a href="${hrefOf(id)}" class="node n-${k}${on}" data-id="${id}" aria-label="${esc(n.label)}"><rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="${k === "section" ? 4 : 2}" fill="${fill}" stroke="${id === focusId ? "var(--ink)" : stroke}" stroke-width="${id === focusId ? 3 : sw}"/><foreignObject x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}">${inner.replace("<div ", '<div xmlns="http://www.w3.org/1999/xhtml" ')}</foreignObject>${dot}</a>`;
+  }
+  return s + "</svg>";
+}
+function wireHover(root) {
+  const svg = root && root.querySelector("svg"); if (!svg || svg.classList.contains("focusing")) return;
+  const segs = [...svg.querySelectorAll(".seg")], ns = [...svg.querySelectorAll(".node")];
+  const on = id => { svg.classList.add("focusing"); const near = new Set([id]); segs.forEach(g => { const ids = g.dataset.ids.split(" "), hit = ids.includes(id); g.classList.toggle("on", hit); if (hit) ids.forEach(i => near.add(i)); }); ns.forEach(n => n.classList.toggle("on", near.has(n.dataset.id))); };
+  const off = () => { svg.classList.remove("focusing"); segs.forEach(g => g.classList.remove("on")); ns.forEach(n => n.classList.remove("on")); };
+  ns.forEach(n => { n.addEventListener("mouseenter", () => on(n.dataset.id)); n.addEventListener("mouseleave", off); n.addEventListener("focus", () => on(n.dataset.id)); n.addEventListener("blur", off); });
+}
+const legend = `<ul class="legend" aria-label="범례"><li><svg width="34" height="10"><line x1="0" y1="5" x2="34" y2="5" stroke="var(--tree)" stroke-width="1.5"/></svg>계층 구조</li>
+  <li><svg width="34" height="10"><line x1="0" y1="5" x2="27" y2="5" stroke="var(--link)" stroke-width="1.6"/><path d="M26,1 L34,5 L26,9 z" fill="var(--link)"/></svg>기술 연결</li>
+  <li><svg width="34" height="10"><line x1="0" y1="5" x2="27" y2="5" stroke="var(--prop)" stroke-width="1.6" stroke-dasharray="5 3"/><path d="M26,1 L34,5 L26,9 z" fill="var(--prop)"/></svg>제안 연결 (원본에 없음)</li>
+  <li><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="#B4581A"/></svg>진행 상태</li></ul>`;
+
+/* ---------- shell ---------- */
+function shell(id, tab) {
+  const n = byId[id], isSec = n.kind === "section", isRef = n.kind === "ref", main = (isSec ? [id] : relSections(id))[0] || "s_cl";
+  const crumbs = ['<a href="#home">Simulation</a>'];
+  if (isSec) crumbs.push(esc(n.label)); else if (isRef) crumbs.push("참고자료", esc(n.label));
+  else { if (n.sec) { crumbs.push(`<a href="${hrefOf(n.sec)}">${esc(secOf(n.sec).label)}</a>`); const par = D.edges.find(e => e[1] === id && e[2] === "tree"); if (par && byId[par[0]].kind === "task") crumbs.push(`<a href="${hrefOf(par[0])}">${esc(byId[par[0]].label)}</a>`); } else crumbs.push("핵심 기술 모듈"); crumbs.push(esc(n.label)); }
+  const kicker = isRef ? "참고자료" : isSec ? `${n.rq} · 연구 세션` : n.sec ? `${secOf(n.sec).rq} · ${esc(secOf(n.sec).label)}` : n.kind === "wm" ? "생성 엔진" : "핵심 기술 모듈";
+  let pill; if (isSec) { const ids = [...sectionMembers(id), ...sectionTech(id)], d = ids.filter(k => statusOf(k) === "완료").length; pill = `<span class="stpill" style="--st:var(--c)">완료 ${d} / ${ids.length}</span>`; }
+  else if (isRef) pill = `<span class="stpill" style="--st:var(--c-s_cl)">참고자료</span>`; else pill = `<span class="stpill" style="--st:${STC[statusOf(id)]}">${statusOf(id)}</span>`;
+  const tabs = [["doc", "설명", ""], ["works", "Related Works", paperList(id).length], ["config", isSec ? "진행 현황" : "설정", ""]].filter(t => !(isRef && t[0] === "config"));
+  return `<p class="crumbs">${crumbs.join(" › ")}</p><div style="--c:var(--c-${main})">
+  <div class="dhead"><div><p class="kicker">${kicker}</p><h1>${esc(n.label)}</h1>${n.sub ? `<p class="subt">${esc(n.sub)}</p>` : ""}</div>${pill}</div>
+  <nav class="tabs" aria-label="페이지 탭">${tabs.map(([k, l, c]) => `<a href="${hrefOf(id, k)}" ${k === tab ? 'aria-current="page"' : ""}>${l}${c !== "" ? `<span class="cnt">${c}</span>` : ""}</a>`).join("")}</nav><div id="tab"></div></div>`;
+}
+
+/* ---------- 설명 tab ---------- */
+async function docTab(id) {
+  const el = document.getElementById("tab"), n = byId[id], isSec = n.kind === "section", isRef = n.kind === "ref";
+  const secs = isSec ? [] : isRef ? [...new Set(n.applies.flatMap(relSections))].sort() : relSections(id);
+  const inc = D.edges.filter(e => e[1] === id), out = D.edges.filter(e => e[0] === id);
+  const link = (o, dir, t) => `<li><span class="dir">${dir}</span><a href="${hrefOf(o)}">${esc(byId[o].label)}</a>${t === "proposed" ? ' <span class="dir">(제안)</span>' : ""}</li>`;
+  const file = `docs/${id}.md`;
+  el.innerHTML = `<div class="detail"><div>
+    ${isRef ? `<div class="problem"><h3>관련 연구 질문</h3><ul class="chips">${secs.map(sid => `<li><a class="chip sec" style="--c:var(--c-${sid})" href="${hrefOf(sid)}">${secOf(sid).rq} ${esc(secOf(sid).label)}</a></li>`).join("")}</ul></div>`
+      : secs.map(sid => { const s = secOf(sid); return `<div class="rqbox" style="--c:var(--c-${sid})"><a href="${hrefOf(sid)}"><span class="rqtag">${s.rq}</span> <span class="dir">${esc(s.label)}</span><p>${esc(s.q)}</p></a></div>`; }).join("")}
+    ${isSec ? `<div class="rqbox"><span class="rqtag">${n.rq}</span><p>${esc(n.q)}</p></div>` : ""}
+    <div class="docbar"><a class="btn primary" href="${GH()}/edit/main/${file}" target="_blank" rel="noopener">GitHub에서 이 설명 수정</a>
+      <a class="btn" href="${GH()}/commits/main/${file}" target="_blank" rel="noopener">전체 수정 이력</a><span class="meta2" id="lastmod"></span></div>
+    <div class="doc" id="docv"><p class="meta2">불러오는 중…</p></div>
+    ${isSec ? `<div class="problem"><h3>이 질문에 답하는 과제</h3></div><ul class="tasks">${sectionMembers(id).map(k => `<li><a href="${hrefOf(k)}">${esc(byId[k].label)}</a> <span class="dir">${statusOf(k)}</span><p>${esc(byId[k].problem || "")}</p></li>`).join("")}</ul>` : ""}
+    <section class="works" style="margin-top:8px"><h3>최근 수정</h3><ul class="hist" id="hist"><li class="meta2">불러오는 중…</li></ul></section>
+  </div>
+  <aside class="side">
+    ${isRef ? `<section><h3>적용되는 항목</h3><ul>${n.applies.map(a => `<li><a href="${hrefOf(a)}">${esc(byId[a].label)}</a></li>`).join("")}</ul></section>`
+      : isSec ? `<section><h3>연결된 기술 모듈</h3><ul>${sectionTech(id).map(t => `<li><a href="${hrefOf(t)}">${esc(byId[t].label)}</a></li>`).join("")}</ul></section>
+      <section><h3>다른 연구 질문</h3><ul>${D.sections.filter(x => x.id !== id).map(x => `<li><a href="${hrefOf(x.id)}"><b style="color:var(--c-${x.id})">${x.rq}</b> ${esc(x.label)}</a></li>`).join("")}</ul></section>`
+      : `<section><h3>들어오는 연결</h3><ul>${inc.map(e => link(e[0], "←", e[2])).join("") || "<li>없음</li>"}</ul></section>
+      <section><h3>나가는 연결</h3><ul>${out.map(e => link(e[1], "→", e[2])).join("") || "<li>없음</li>"}</ul></section>
+      ${refsFor(id).length ? `<section><h3>참고자료</h3><ul>${refsFor(id).map(r => `<li><a href="${hrefOf(r)}">${esc(byId[r].label)}</a> <span class="dir">${esc(byId[r].sub)}</span></li>`).join("")}</ul></section>` : ""}`}
+    ${ownerOf(id) ? `<section><h3>담당</h3><p style="margin:0">${esc(ownerOf(id))}</p></section>` : ""}
+    <section><h3>핵심 Related Works</h3><ul>${paperList(id).slice(0, 4).map(p => `<li><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title.split(":")[0])}</a> <span class="dir">${esc(p.venue || "")}</span></li>`).join("")}</ul><p style="margin:8px 0 0"><a href="${hrefOf(id, "works")}">전체 보기</a></p></section>
+  </aside></div>
+  ${isRef ? "" : `<h2>파이프라인에서의 위치</h2><div class="figure compact">${svgFigure(id)}</div>`}`;
+  const md = await getDoc(id), secsMd = parseDoc(md), box = document.getElementById("docv");
+  if (box) box.innerHTML = secsMd.length ? secsMd.map(s => `<section><h3>${esc(s.h)}</h3>${mdBlock(s.body) || '<p class="empty">아직 기록이 없습니다.</p>'}</section>`).join("") : `<p class="empty">설명 문서가 없습니다. <a href="${GH()}/new/main/docs?filename=${id}.md" target="_blank" rel="noopener">새로 작성하기</a></p>`;
+  const cs = await commitsFor(file), ul = document.getElementById("hist"), lm = document.getElementById("lastmod");
+  if (!ul) return;
+  if (cs.length && lm) lm.textContent = `마지막 수정 ${fmt(cs[0].commit.author.date)} · ${cs[0].author ? cs[0].author.login : cs[0].commit.author.name}`;
+  ul.innerHTML = cs.length ? cs.map(c => `<li><span>${fmt(c.commit.author.date)}</span><span class="dir">${esc(c.author ? c.author.login : c.commit.author.name)}</span><a href="${esc(c.html_url)}" target="_blank" rel="noopener">${esc(c.commit.message.split("\n")[0])}</a></li>`).join("")
+    : '<li class="meta2">수정 이력을 불러오지 못했습니다. ‘전체 수정 이력’에서 확인하세요.</li>';
+}
+
+/* ---------- Related Works tab ---------- */
+let WF = { f: "all", q: "" };
+function worksTab(id) {
+  const el = document.getElementById("tab");
+  el.innerHTML = `<div class="toolbar"><div class="segbtn" role="group" aria-label="필터">${[["all", "전체"], ["designated", "지정 논문"], ["reference", "참고자료"], ["unread", "안 읽음"], ["community", "기여자 추가"]].map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${WF.f === k}">${l}</button>`).join("")}</div>
+    <input type="search" id="wq" placeholder="제목·메모 검색" value="${esc(WF.q)}" aria-label="논문 검색"><a class="btn primary" href="${issueUrl(id)}" target="_blank" rel="noopener">논문 추가 제안</a></div>
+  <p class="meta2" style="margin:-4px 0 12px">읽음 표시는 이 브라우저에만 저장됩니다. 논문 추가는 GitHub Issue 폼으로 제안하면 관리자 승인 후 자동 반영됩니다.</p>
+  <section class="works"><ol id="wl"></ol></section>`;
+  const list = () => { const q = WF.q.trim().toLowerCase();
+    const ps = paperList(id).filter(p => (WF.f === "all" || (WF.f === "unread" && !ME.read[p.id]) || (WF.f === "community" && p.added_by) || p.tag === WF.f) && (!q || (p.title + " " + (p.note || "") + " " + (p.venue || "")).toLowerCase().includes(q)));
+    document.getElementById("wl").innerHTML = ps.map(p => `<li class="${ME.read[p.id] ? "read" : ""}"><input class="rd" type="checkbox" data-k="${esc(p.id)}" ${ME.read[p.id] ? "checked" : ""} aria-label="읽음 표시: ${esc(p.title)}">
+      <div>${p.tag === "designated" ? '<span class="badge">지정 논문</span>' : ""}${p.tag === "reference" ? '<span class="badge" style="color:var(--c-s_cl);border-color:var(--c-s_cl)">참고자료</span>' : ""}${p.added_by ? `<span class="badge" style="color:var(--link);border-color:var(--link)">@${esc(p.added_by)}</span>` : ""}<a class="pt" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a><span class="pv">${esc(p.venue || "")}</span>
+      ${p.note ? `<p class="pn">${esc(p.note)}</p>` : ""}${byId[id].kind === "section" ? `<p class="pn">${p.nodes.filter(n => byId[n]).map(n => `<a href="${hrefOf(n)}">${esc(byId[n].label)}</a>`).join(" · ")}</p>` : ""}</div></li>`).join("")
+      || `<li><span></span><p class="empty">조건에 맞는 논문이 없습니다.</p></li>`; };
+  list();
+  el.querySelectorAll("[data-f]").forEach(b => b.onclick = () => { WF.f = b.dataset.f; el.querySelectorAll("[data-f]").forEach(x => x.setAttribute("aria-pressed", x === b)); list(); });
+  el.querySelector("#wq").oninput = e => { WF.q = e.target.value; list(); };
+  el.querySelector("#wl").addEventListener("change", e => { const k = e.target.dataset.k; if (!k) return; if (e.target.checked) ME.read[k] = true; else delete ME.read[k]; saveMe(); list(); });
+}
+
+/* ---------- 설정 tab ---------- */
+const yv = v => Array.isArray(v) ? "[" + v.map(x => JSON.stringify(x)).join(", ") + "]" : typeof v === "number" || typeof v === "boolean" ? String(v) : JSON.stringify(v ?? "");
+function yamlFor(id) {
+  const n = byId[id], c = cfgOf(id); let y = `${id}:\n  name: ${JSON.stringify(n.label)}\n  status: ${JSON.stringify(statusOf(id))}\n  owner: ${JSON.stringify(ownerOf(id))}\n`;
+  const fs = D.cfg[id] || []; if (fs.length) { y += "  config:\n"; for (const f of fs) y += `    ${f.k}: ${yv(c[f.k])}${f.u ? "  # " + f.u : ""}\n`; }
+  if (ME.note[id]) y += "  note: |\n" + ME.note[id].split("\n").map(l => "    " + l).join("\n") + "\n";
+  return y;
+}
+function fieldHtml(f, v) {
+  const nm = `f_${f.k}`; let ctl;
+  if (f.t === "sel") ctl = `<select id="${nm}" data-k="${f.k}">${f.o.map(o => `<option ${o === v ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
+  else if (f.t === "multi") ctl = `<div class="opts" role="group" aria-labelledby="${nm}_l">${f.o.map(o => `<label><input type="checkbox" data-k="${f.k}" data-o="${esc(o)}" ${v.includes(o) ? "checked" : ""}>${esc(o)}</label>`).join("")}</div>`;
+  else if (f.t === "num") ctl = `<div class="numrow"><input id="${nm}" type="number" step="any" data-k="${f.k}" value="${esc(v)}">${f.u ? `<span class="u">${esc(f.u)}</span>` : ""}</div>`;
+  else if (f.t === "bool") ctl = `<div class="opts"><label><input type="checkbox" id="${nm}" data-k="${f.k}" ${v ? "checked" : ""}>사용</label></div>`;
+  else ctl = `<input id="${nm}" type="text" data-k="${f.k}" value="${esc(v)}">`;
+  return `<div class="field"><label class="l" id="${nm}_l" for="${nm}">${esc(f.l)}</label>${ctl}${f.h ? `<p class="h">${esc(f.h)}</p>` : ""}</div>`;
+}
+function configTab(id) {
+  const el = document.getElementById("tab"), c = cfgOf(id), fs = D.cfg[id] || [];
+  el.innerHTML = `<div class="cfg"><form id="cf" onsubmit="return false">
+    <fieldset><legend>진행 관리 (팀 공유)</legend><p style="margin:0 0 8px">상태 <b>${statusOf(id)}</b>${ownerOf(id) ? ` · 담당 <b>${esc(ownerOf(id))}</b>` : ""}</p>
+      <a class="btn" href="${GH()}/edit/main/data/progress.json" target="_blank" rel="noopener">GitHub에서 진행 상태 수정</a></fieldset>
+    <fieldset><legend>${esc(byId[id].label)} 설정 (내 실험용 · 이 브라우저)</legend>${fs.map(f => fieldHtml(f, c[f.k])).join("")}
+      <div class="field"><label class="l" for="nt">메모</label><textarea id="nt" placeholder="실험 계획, 이슈, 다음 단계">${esc(ME.note[id] || "")}</textarea></div></fieldset></form>
+  <aside class="preview" aria-label="설정 미리보기"><h3 style="margin:0 0 8px;font-size:15px;color:var(--muted)">config.yaml 미리보기</h3><pre id="yp"></pre>
+    <div class="acts"><button class="btn" id="cp" type="button">복사</button><button class="btn primary" id="dl" type="button">YAML 다운로드</button><button class="btn" id="rs" type="button">기본값으로 초기화</button><span class="saved"></span></div></aside></div>`;
+  const yp = el.querySelector("#yp"), upd = () => yp.textContent = yamlFor(id); upd();
+  el.querySelector("#cf").addEventListener("input", e => { const t = e.target;
+    if (t.id === "nt") ME.note[id] = t.value;
+    else if (t.dataset.k) { const f = fs.find(x => x.k === t.dataset.k), cur = (ME.cfg[id] = ME.cfg[id] || {});
+      if (f.t === "multi") cur[f.k] = [...el.querySelectorAll(`[data-k="${f.k}"]:checked`)].map(x => x.dataset.o); else if (f.t === "bool") cur[f.k] = t.checked; else if (f.t === "num") cur[f.k] = t.value === "" ? "" : Number(t.value); else cur[f.k] = t.value; }
+    saveMe(); upd(); });
+  el.querySelector("#cp").onclick = e => copy(yp.textContent, e.target);
+  el.querySelector("#dl").onclick = () => download(`${id}.config.yaml`, yp.textContent, "text/yaml");
+  el.querySelector("#rs").onclick = () => { delete ME.cfg[id]; saveMe(); configTab(id); };
+}
+function sectionConfigTab(id) {
+  const el = document.getElementById("tab"), ids = [...sectionMembers(id), ...sectionTech(id)], d = ids.filter(k => statusOf(k) === "완료").length;
+  const tbl = (t, list) => `<h3 style="font-size:15px;color:var(--muted);margin:24px 0 6px">${t}</h3><div class="tw"><table class="prog"><thead><tr><th>항목</th><th>상태</th><th>담당</th><th></th></tr></thead><tbody>${list.map(k => `<tr><td><a href="${hrefOf(k)}">${esc(byId[k].label)}</a></td><td><span style="color:${STC[statusOf(k)]};font-weight:700">${statusOf(k)}</span></td><td>${esc(ownerOf(k)) || '<span class="dir">-</span>'}</td><td><a href="${hrefOf(k, "config")}">설정</a></td></tr>`).join("")}</tbody></table></div>`;
+  el.innerHTML = `<p style="margin:0">완료 ${d} / ${ids.length}</p><div class="bar"><i style="width:${d / ids.length * 100}%"></i></div>
+  ${tbl("이 세션의 과제", sectionMembers(id))}${tbl("연결된 기술 모듈", sectionTech(id))}
+  <div class="manage" style="margin-top:22px"><a class="btn primary" href="${GH()}/edit/main/data/progress.json" target="_blank" rel="noopener">GitHub에서 진행 상태 수정</a><button class="btn" id="scp" type="button">세션 설정 YAML 복사</button></div>`;
+  el.querySelector("#scp").onclick = e => copy(`# ${byId[id].rq} ${byId[id].label}\n` + ids.map(yamlFor).join("\n"), e.target);
+}
+
+/* ---------- home ---------- */
+async function home() {
+  const des = PAPERS.filter(p => p.tag === "designated"), refs = Object.keys(D.refs), all = D.nodes.filter(n => n.id !== "root").map(n => n.id);
+  const venues = PAPERS.filter(p => /2025|2026/.test(p.venue || "")).length;
+  app.innerHTML = `<header class="top"><div><h1>E2E 자율주행 Simulation Pipeline</h1>
+  <p class="lede">상자를 누르면 그 항목의 설명, Related Works, 설정 페이지로 이동합니다. Related Works ${PAPERS.length}편(2025–2026년 ${venues}편)을 항목별로 정리했고, 누구나 GitHub로 논문과 설명을 보탤 수 있습니다.</p></div>
+  <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">${legend}<a class="btn" href="${GH()}" target="_blank" rel="noopener">GitHub 저장소</a></div></header>
+  <div class="figure">${svgFigure()}</div>
+  <h2>최근 수정</h2><ul class="tasks" id="recent"><li class="meta2">불러오는 중…</li></ul>
+  <h2>연구 질문</h2><p class="sub">세션마다 하나의 질문이 있고, 하위 과제들이 그 질문을 풀기 위한 문제입니다.</p>
+  <ul class="rqlist">${D.sections.map(s => `<li style="--c:var(--c-${s.id})"><span class="rqtag">${s.rq}</span><a class="q" href="${hrefOf(s.id)}">${esc(s.q)}</a>
+    <div class="meta">${esc(s.label)} · <a href="${hrefOf(s.id, "config")}">진행 현황</a><ul class="chips">${treeKids(s.id).map(k => `<li><a class="chip" href="${hrefOf(k)}">${esc(byId[k].label)}</a></li>`).join("")}</ul></div></li>`).join("")}</ul>
+  <h2>지정 논문</h2><ul class="tasks">${des.map(p => `<li><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a> <span class="pv">${esc(p.venue)}</span><ul class="chips">${p.nodes.filter(n => byId[n]).map(n => `<li><a class="chip" href="${hrefOf(n, "works")}">${esc(byId[n].label)}</a></li>`).join("")}</ul></li>`).join("")}</ul>
+  <h2>참고자료</h2><p class="sub">구현 대상이 아닌 설계 참고용 자료입니다.</p>
+  <ul class="tasks">${refs.map(k => `<li><a href="${hrefOf(k)}">${esc(byId[k].label)}</a> <span class="pv">${esc(byId[k].sub)}</span><ul class="chips">${byId[k].applies.map(a => `<li><a class="chip" href="${hrefOf(a)}">${esc(byId[a].label)}</a></li>`).join("")}</ul></li>`).join("")}</ul>
+  <h2>함께 만들기</h2><p class="sub">논문은 Issue 폼으로 제안하고, 설명은 각 항목의 ‘GitHub에서 이 설명 수정’으로 고칩니다. 쓰기 권한이 없으면 GitHub가 자동으로 fork와 Pull Request를 만들어 줍니다.</p>
+  <div class="manage"><a class="btn primary" href="${issueUrl("")}" target="_blank" rel="noopener">논문 추가 제안</a><a class="btn" href="${GH()}/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">기여 방법</a><a class="btn" href="assets/Simulation_Pipeline.pptx">PPT 받기</a><button class="btn" id="xj" type="button">내 설정 JSON 내보내기</button></div>`;
+  wireHover(app.querySelector(".figure"));
+  app.querySelector("#xj").onclick = () => download("my-settings.json", JSON.stringify(ME, null, 2), "application/json");
+  const cs = await commitsFor("docs", 8), ul = document.getElementById("recent"); if (!ul) return;
+  ul.innerHTML = cs.length ? cs.map(c => `<li><a href="${esc(c.html_url)}" target="_blank" rel="noopener">${esc(c.commit.message.split("\n")[0])}</a> <span class="dir">${fmt(c.commit.author.date)} · ${esc(c.author ? c.author.login : c.commit.author.name)}</span></li>`).join("") : '<li class="meta2">아직 수정 기록이 없습니다.</li>';
+}
+
+/* ---------- router ---------- */
+function parseHash() { const [t, id, tab0] = decodeURIComponent(location.hash.replace(/^#/, "")).split("."); return { t, id, tab: ["doc", "works", "config"].includes(tab0) ? tab0 : "doc" }; }
+function route() {
+  const { t, id, tab } = parseHash();
+  const ok = (t === "s" && byId[id] && byId[id].kind === "section") || (t === "n" && byId[id] && !["root", "section", "ref"].includes(byId[id].kind)) || (t === "r" && byId[id] && byId[id].kind === "ref");
+  if (ok) {
+    app.innerHTML = shell(id, tab === "config" && t === "r" ? "doc" : tab);
+    if (tab === "works") worksTab(id); else if (tab === "config" && t !== "r") (t === "s" ? sectionConfigTab : configTab)(id); else docTab(id);
+    document.title = `${byId[id].label} · E2E Simulation Pipeline`;
+  } else { home(); document.title = "E2E 자율주행 Simulation Pipeline"; }
+  window.scrollTo(0, 0);
+}
+(async () => {
+  try {
+    const [pipe, papers, prog] = await Promise.all(["data/pipeline.json", "data/papers.json", "data/progress.json"].map(f => fetch(f, { cache: "no-cache" }).then(r => { if (!r.ok) throw new Error(f); return r.json(); })));
+    D = pipe; PAPERS = papers; PROG = prog; REPO = pipe.repo;
+    byId = Object.fromEntries(D.nodes.map(n => [n.id, n]));
+    D.sections.forEach(s => byId[s.id] = { ...s, kind: "section", sec: s.id });
+    for (const [k, r] of Object.entries(D.refs)) byId[k] = { id: k, kind: "ref", ...r };
+    addEventListener("hashchange", route); route();
+  } catch (e) {
+    app.innerHTML = `<h1>데이터를 불러오지 못했습니다</h1><p class="lede">이 페이지는 웹 서버에서 열어야 합니다. 저장소 폴더에서 <code>python3 -m http.server</code>를 실행한 뒤 http://localhost:8000 으로 여세요. (${esc(e.message)})</p>`;
+  }
+})();
+</script>
+</body>
+</html>

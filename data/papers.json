@@ -1,0 +1,889 @@
+[
+  {
+    "id": "gs3d",
+    "title": "3D Gaussian Splatting for Real-Time Radiance Field Rendering",
+    "venue": "SIGGRAPH 2023",
+    "url": "https://arxiv.org/abs/2308.04079",
+    "note": "실시간 rasterization 기반 장면 표현. 대부분 주행 재구성의 기반.",
+    "tag": "",
+    "nodes": [
+      "dsr",
+      "speed"
+    ]
+  },
+  {
+    "id": "gut",
+    "title": "3DGUT: Enabling Distorted Cameras and Secondary Rays in Gaussian Splatting",
+    "venue": "CVPR 2025",
+    "url": "https://arxiv.org/abs/2412.12507",
+    "note": "왜곡 카메라·rolling shutter 지원. NVIDIA NuRec/AlpaSim 렌더링 기반.",
+    "tag": "",
+    "nodes": [
+      "dsr",
+      "static",
+      "sync",
+      "sensorplat"
+    ]
+  },
+  {
+    "id": "nurec",
+    "title": "NVIDIA Omniverse NuRec: Neural reconstruction & rendering for AV simulation",
+    "venue": "NVIDIA, 2025–26",
+    "url": "https://docs.nvidia.com/nurec/av/index.html",
+    "note": "NCore 포맷 로그를 3D Gaussian 기반 USDZ 장면으로 복원하고, gRPC API로 AlpaSim·CARLA 등에서 실시간 렌더링. pinhole/fisheye/f-theta, rolling/global shutter, spinning LiDAR 지원.",
+    "tag": "designated",
+    "nodes": [
+      "dsr",
+      "sync",
+      "sensorplat"
+    ]
+  },
+  {
+    "id": "street",
+    "title": "Street Gaussians: Modeling Dynamic Urban Scenes with Gaussian Splatting",
+    "venue": "ECCV 2024",
+    "url": "https://arxiv.org/abs/2401.01339",
+    "note": "배경 Gaussian + 추적 차량별 Gaussian으로 정적/동적 분리.",
+    "tag": "",
+    "nodes": [
+      "dsr",
+      "static",
+      "dynamic"
+    ]
+  },
+  {
+    "id": "omnire",
+    "title": "OmniRe: Omni Urban Scene Reconstruction",
+    "venue": "ICLR 2025",
+    "url": "https://arxiv.org/abs/2408.16760",
+    "note": "차량뿐 아니라 보행자·비강체까지 scene graph로 동적 복원.",
+    "tag": "",
+    "nodes": [
+      "dsr",
+      "dynamic"
+    ]
+  },
+  {
+    "id": "splatad",
+    "title": "SplatAD: Real-Time Lidar and Camera Rendering with 3D Gaussian Splatting for Autonomous Driving",
+    "venue": "CVPR 2025",
+    "url": "https://research.zenseact.com/publications/splatad/",
+    "note": "3DGS로 카메라+LiDAR 동시 실시간 렌더링. rolling shutter, LiDAR intensity·ray dropout 모델링.",
+    "tag": "",
+    "nodes": [
+      "dsr",
+      "dynamic",
+      "sync",
+      "sensorplat"
+    ]
+  },
+  {
+    "id": "unisim",
+    "title": "UniSim: A Neural Closed-Loop Sensor Simulator",
+    "venue": "CVPR 2023",
+    "url": "https://arxiv.org/abs/2308.01898",
+    "note": "로그 기반 neural 센서 시뮬레이터. 액터 삽입·제거·궤적 수정.",
+    "tag": "",
+    "nodes": [
+      "dsr",
+      "edit"
+    ]
+  },
+  {
+    "id": "neurad",
+    "title": "NeuRAD: Neural Rendering for Autonomous Driving",
+    "venue": "CVPR 2024",
+    "url": "https://arxiv.org/abs/2311.15260",
+    "note": "카메라+LiDAR 동시 렌더링, rolling shutter·센서 타이밍 모델링.",
+    "tag": "",
+    "nodes": [
+      "dsr",
+      "dynamic",
+      "sync"
+    ]
+  },
+  {
+    "id": "recondreamerpp",
+    "title": "ReconDreamer++: Harmonizing Generative and Reconstructive Models for Driving Scene Representation",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2503.18438",
+    "note": "원 궤적 품질은 Street Gaussians 수준으로 유지하면서 새 궤적(차선 이동) 품질을 크게 개선.",
+    "tag": "",
+    "nodes": [
+      "dsr",
+      "egotraj",
+      "rqi"
+    ]
+  },
+  {
+    "id": "drivingrecon",
+    "title": "DrivingRecon: Large 4D Gaussian Reconstruction Model for Autonomous Driving",
+    "venue": "NeurIPS 2025",
+    "url": "https://arxiv.org/abs/2412.09043",
+    "note": "서라운드 영상에서 4D Gaussian을 한 번의 feed-forward로 예측. 장면별 최적화 없이 빠르게 복원하고 편집·차량 적응에 활용.",
+    "tag": "",
+    "nodes": [
+      "dsr",
+      "dynamic",
+      "speed"
+    ]
+  },
+  {
+    "id": "evolsplat4d",
+    "title": "EVolSplat4D: Efficient Volume-based Gaussian Splatting for 4D Urban Scene Synthesis",
+    "venue": "2026",
+    "url": "https://arxiv.org/abs/2601.15951",
+    "note": "정적·동적을 통합한 volume 기반 feed-forward 4D 복원, 장면 복원을 약 1.3초 수준으로 단축.",
+    "tag": "",
+    "nodes": [
+      "dsr",
+      "speed"
+    ]
+  },
+  {
+    "id": "emernerf",
+    "title": "EmerNeRF: Emergent Spatial-Temporal Scene Decomposition via Self-Supervision",
+    "venue": "ICLR 2024",
+    "url": "https://arxiv.org/abs/2311.02077",
+    "note": "라벨 없이 정적/동적 필드를 자가 분리.",
+    "tag": "",
+    "nodes": [
+      "static"
+    ]
+  },
+  {
+    "id": "streetcrafter",
+    "title": "StreetCrafter: Street View Synthesis with Controllable Video Diffusion Models",
+    "venue": "CVPR 2025",
+    "url": "https://arxiv.org/abs/2412.13188",
+    "note": "LiDAR 조건 video diffusion으로 새 궤적 영상을 생성하고 3DGS에 증류. 차선 변경 시점 렌더링과 장면 편집을 함께 지원.",
+    "tag": "",
+    "nodes": [
+      "static",
+      "egotraj",
+      "render",
+      "rqi"
+    ]
+  },
+  {
+    "id": "lidargspp",
+    "title": "LiDAR-GS++: Improving LiDAR Gaussian Reconstruction via Diffusion Priors",
+    "venue": "AAAI 2026",
+    "url": "https://arxiv.org/abs/2511.12304",
+    "note": "LiDAR 재시뮬레이션의 측면 이동 시점 품질 저하를 LiDAR 조건 diffusion과 증류로 보완.",
+    "tag": "",
+    "nodes": [
+      "static",
+      "rqi",
+      "sensorplat"
+    ]
+  },
+  {
+    "id": "gaia4",
+    "title": "GAIA-4: Multimodal world model for closed-loop simulation (Simulation 2.0)",
+    "venue": "Wayve, 2026",
+    "url": "https://aiwiki.ai/wiki/gaia_4_wayve",
+    "note": "참고자료(비공개 모델). 카메라+레이더를 함께 생성하는 closed-loop 월드모델. world-on-rails와 reactive agent 모드를 전환해 사용.",
+    "tag": "reference",
+    "nodes": [
+      "reactive",
+      "edit",
+      "multiagent",
+      "wm",
+      "ref_gaia4"
+    ]
+  },
+  {
+    "id": "catk",
+    "title": "Closed-Loop Supervised Fine-Tuning of Tokenized Traffic Models (CAT-K)",
+    "venue": "CVPR 2025",
+    "url": "https://arxiv.org/abs/2412.05334",
+    "note": "open-loop 학습 traffic 모델의 closed-loop covariate shift를 CAT-K rollout 미세조정으로 완화. 7M 모델로 WOSAC 1위.",
+    "tag": "",
+    "nodes": [
+      "reactive",
+      "multiagent"
+    ]
+  },
+  {
+    "id": "smartr1",
+    "title": "Advancing Multi-agent Traffic Simulation via R1-Style Reinforcement Fine-Tuning (SMART-R1)",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2509.23993",
+    "note": "SFT-RFT-SFT 반복으로 지표 정렬. 2025 WOSAC 1위.",
+    "tag": "",
+    "nodes": [
+      "reactive",
+      "multiagent"
+    ]
+  },
+  {
+    "id": "smart",
+    "title": "SMART: Scalable Multi-agent Real-time Motion Generation via Next-token Prediction",
+    "venue": "NeurIPS 2024",
+    "url": "https://arxiv.org/abs/2405.15677",
+    "note": "토큰 기반 다중 에이전트 행동 생성, sim agent 벤치마크 강세.",
+    "tag": "",
+    "nodes": [
+      "reactive",
+      "multiagent"
+    ]
+  },
+  {
+    "id": "waymax",
+    "title": "Waymax: An Accelerated, Data-Driven Simulator for Large-Scale Autonomous Driving Research",
+    "venue": "NeurIPS 2023",
+    "url": "https://arxiv.org/abs/2310.08710",
+    "note": "로그 재생 vs reactive agent 비교가 가능한 가속 시뮬레이터.",
+    "tag": "",
+    "nodes": [
+      "reactive",
+      "multiagent"
+    ]
+  },
+  {
+    "id": "gaia3",
+    "title": "GAIA-3: Generative world model for AV evaluation & validation",
+    "venue": "Wayve, Dec 2025",
+    "url": "https://www.autonomousvehicleinternational.com/news/ai-sensor-fusion/wayves-gaia-3-generative-world-model-now-available-for-autonomous-driving-validation.html",
+    "note": "15B 파라미터. 안전임계 시나리오 생성·embodiment transfer로 '평가용' 월드모델로 전환.",
+    "tag": "",
+    "nodes": [
+      "reactive",
+      "sim2real",
+      "ref_gaia4"
+    ]
+  },
+  {
+    "id": "causaldrive",
+    "title": "CausalDrive: Real-time Causal World Models for Autonomous Driving",
+    "venue": "2026",
+    "url": "https://arxiv.org/abs/2606.15341",
+    "note": "행동 제어 가능한 실시간(>10 FPS) 생성 시뮬레이터. 생성형 closed-loop 평가와 RL 사후학습 지원.",
+    "tag": "",
+    "nodes": [
+      "reactive",
+      "wm"
+    ]
+  },
+  {
+    "id": "drivex",
+    "title": "DriveX: Driving View Synthesis on Free-form Trajectories with Generative Prior",
+    "venue": "ICCV 2025",
+    "url": "https://arxiv.org/abs/2412.01717",
+    "note": "단일 궤적 로그에서 inpainting 기반 video restoration으로 궤적 밖 시점을 보정.",
+    "tag": "",
+    "nodes": [
+      "egotraj"
+    ]
+  },
+  {
+    "id": "lidarpainter",
+    "title": "LidarPainter: One-Step Away From Any Lidar View To Novel Guidance",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2507.12114",
+    "note": "희소 LiDAR 조건 + one-step diffusion으로 실시간 차선 이동 시점 생성.",
+    "tag": "",
+    "nodes": [
+      "egotraj",
+      "rqi"
+    ]
+  },
+  {
+    "id": "hugsim",
+    "title": "HUGSIM: A Real-Time, Photo-Realistic and Closed-Loop Simulator for Autonomous Driving",
+    "venue": "2024",
+    "url": "https://arxiv.org/abs/2412.01718",
+    "note": "3DGS 기반 closed-loop 벤치마크, 궤적 이탈 시 렌더링 품질 이슈를 다룸.",
+    "tag": "",
+    "nodes": [
+      "egotraj"
+    ]
+  },
+  {
+    "id": "difix",
+    "title": "Difix3D+: Improving 3D Reconstructions with Single-Step Diffusion Models (NVIDIA Fixer)",
+    "venue": "CVPR 2025",
+    "url": "https://arxiv.org/abs/2503.01774",
+    "note": "single-step fixer. offline(학습 시 pseudo-view 정제) / online(렌더 시 후처리) 두 모드.",
+    "tag": "",
+    "nodes": [
+      "egotraj",
+      "render",
+      "rqi"
+    ]
+  },
+  {
+    "id": "omnidreams",
+    "title": "NVIDIA OmniDreams: Real-Time Generative World Model for Closed-Loop AV Simulation",
+    "venue": "NVIDIA, 2026",
+    "url": "https://arxiv.org/abs/2606.03159",
+    "note": "AlpaSim 센서 시뮬레이터를 NuRec→생성모델로 교체해도 정책 순위가 보존됨을 보임.",
+    "tag": "",
+    "nodes": [
+      "egotraj",
+      "speed",
+      "sim2real",
+      "wm"
+    ]
+  },
+  {
+    "id": "rad",
+    "title": "RAD: Training an End-to-End Driving Policy via Large-Scale 3DGS-based Reinforcement Learning",
+    "venue": "NeurIPS 2025",
+    "url": "https://arxiv.org/abs/2502.13144",
+    "note": "3DGS 환경에서 E2E 정책을 강화학습(IL 정규화 포함). IL 대비 충돌률 3배 감소, 미관측 3DGS 장면 closed-loop 벤치마크 제공.",
+    "tag": "",
+    "nodes": [
+      "egotraj",
+      "e2ecmp",
+      "sim2real"
+    ]
+  },
+  {
+    "id": "gscalib",
+    "title": "3DGS-Calib: 3D Gaussian Splatting for Multimodal SpatioTemporal Calibration",
+    "venue": "2024",
+    "url": "https://arxiv.org/abs/2403.11577",
+    "note": "LiDAR-카메라 외부파라미터와 시간 오프셋을 3DGS로 함께 추정(KITTI-360 평균 6.7ms 오차).",
+    "tag": "",
+    "nodes": [
+      "sync"
+    ]
+  },
+  {
+    "id": "tlccalib",
+    "title": "Targetless LiDAR-Camera Calibration with Neural Gaussian Splatting",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2504.04597",
+    "note": "타깃 없이 Gaussian 표현으로 센서 포즈를 공동 최적화, 드리프트 재보정.",
+    "tag": "",
+    "nodes": [
+      "sync"
+    ]
+  },
+  {
+    "id": "neuradar",
+    "title": "NeuRadar: Neural Radiance Fields for Automotive Radar Point Clouds",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2504.00859",
+    "note": "NeRF 기반 레이더 점군 재시뮬레이션 기준선, 확률적 표현으로 레이더의 확률적 특성 반영.",
+    "tag": "",
+    "nodes": [
+      "sync",
+      "sensorplat"
+    ]
+  },
+  {
+    "id": "alpasim",
+    "title": "AlpaSim: Open-source closed-loop AV simulator (Alpamayo ecosystem)",
+    "venue": "NVIDIA, 2026",
+    "url": "https://radiancefields.com/nvidia-unveils-alpasim-at-ces",
+    "note": "gRPC 마이크로서비스 구조, NuRec(3DGUT) 센서 렌더링, collision/off-road 등 지표를 시뮬 실행과 분리 계산, 인위적 latency 설정 지원.",
+    "tag": "designated",
+    "nodes": [
+      "metrics",
+      "e2ecmp",
+      "latency",
+      "sensorplat"
+    ]
+  },
+  {
+    "id": "ccm",
+    "title": "Beyond Binary Metrics: Unveiling the Safety Illusion in Autonomous Driving Simulation",
+    "venue": "2026",
+    "url": "https://hub.hku.hk/handle/10722/375354",
+    "note": "이진 충돌률의 한계 지적, 충돌 심각도까지 반영한 Composite Collision Metric 제안.",
+    "tag": "",
+    "nodes": [
+      "metrics"
+    ]
+  },
+  {
+    "id": "pseudosim",
+    "title": "Pseudo-Simulation for Autonomous Driving (NAVSIM v2)",
+    "venue": "CoRL 2025",
+    "url": "https://arxiv.org/abs/2506.04218",
+    "note": "실데이터 + 사전 렌더링한 3DGS 관측으로 closed-loop 결과와 R²=0.8 상관을 6배 적은 연산으로 달성.",
+    "tag": "",
+    "nodes": [
+      "metrics",
+      "speed",
+      "e2ecmp",
+      "sim2real"
+    ]
+  },
+  {
+    "id": "navsim",
+    "title": "NAVSIM: Data-Driven Non-Reactive Autonomous Vehicle Simulation and Benchmarking",
+    "venue": "NeurIPS 2024",
+    "url": "https://arxiv.org/abs/2406.15349",
+    "note": "open-loop와 closed-loop 사이 pseudo-simulation 지표(PDMS).",
+    "tag": "",
+    "nodes": [
+      "metrics",
+      "e2ecmp"
+    ]
+  },
+  {
+    "id": "b2d",
+    "title": "Bench2Drive: Towards Multi-Ability Benchmarking of Closed-Loop End-To-End Autonomous Driving",
+    "venue": "NeurIPS 2024",
+    "url": "https://arxiv.org/abs/2406.03877",
+    "note": "E2E 모델 공정 비교용 closed-loop 벤치마크 프로토콜.",
+    "tag": "",
+    "nodes": [
+      "metrics",
+      "e2ecmp"
+    ]
+  },
+  {
+    "id": "actbench",
+    "title": "ACT-Bench: Towards Action Controllable World Models for Autonomous Driving",
+    "venue": "2024",
+    "url": "https://arxiv.org/abs/2412.05337",
+    "note": "월드모델이 행동 지시를 얼마나 정확히 따르는지(action fidelity) 평가하는 공개 벤치마크.",
+    "tag": "",
+    "nodes": [
+      "metrics",
+      "wm"
+    ]
+  },
+  {
+    "id": "sparsestreet",
+    "title": "SparseStreet: Sparse Gaussian Splatting for Real-Time Street Scene Simulation",
+    "venue": "2026",
+    "url": "https://arxiv.org/abs/2606.03909",
+    "note": "주행 장면 3DGS의 저장 용량 중복을 줄이는 주행 특화 압축.",
+    "tag": "",
+    "nodes": [
+      "speed",
+      "gcomp"
+    ]
+  },
+  {
+    "id": "lightg",
+    "title": "LightGaussian: Unbounded 3D Gaussian Compression with 15x Reduction and 200+ FPS",
+    "venue": "NeurIPS 2024",
+    "url": "https://arxiv.org/abs/2311.17245",
+    "note": "pruning·SH distillation·양자화로 용량↓ FPS↑.",
+    "tag": "",
+    "nodes": [
+      "speed",
+      "gcomp"
+    ]
+  },
+  {
+    "id": "zytworld",
+    "title": "ZYT-World: A Real-Time Controllable World Model for Closed-Loop Autonomous-Driving Simulation",
+    "venue": "2026",
+    "url": "https://arxiv.org/abs/2609.21712",
+    "note": "closed-loop 월드모델 요건(양산 rig와 센서 일치, 제어 주기 내 실시간 생성 등)을 정리하고 실시간 멀티뷰 생성 제시.",
+    "tag": "",
+    "nodes": [
+      "speed",
+      "sensorplat",
+      "wm"
+    ]
+  },
+  {
+    "id": "onefixer",
+    "title": "OneFixer: One-Step Autoregressive 3DGS Refinement for Driving Scenes",
+    "venue": "2026",
+    "url": "https://arxiv.org/abs/2609.32175",
+    "note": "주행용 one-step AR video diffusion fixer. 정책과 closed-loop 시 원본 3DGS 대비 충돌률을 약 1/3 감소. (요청하신 'Onfixer'로 판단)",
+    "tag": "designated",
+    "nodes": [
+      "render",
+      "rqi"
+    ]
+  },
+  {
+    "id": "artifixer",
+    "title": "ArtiFixer: Enhancing and Extending 3D Reconstruction with Auto-Regressive Diffusion Models",
+    "venue": "NVIDIA, 2026",
+    "url": "https://arxiv.org/abs/2603.00492",
+    "note": "opacity mixing으로 기존 관측과 일관성 유지 + causal AR 모델로 수백 프레임을 한 번에 생성/3D에 증류.",
+    "tag": "designated",
+    "nodes": [
+      "render",
+      "rqi"
+    ]
+  },
+  {
+    "id": "simscale",
+    "title": "SimScale: Learning to Drive via Real-World Simulation at Scale",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2511.23369",
+    "note": "3DGS 시뮬 장면을 대량 생성해 학습. 새 시점 PSNR<27 장면은 품질 필터로 제외.",
+    "tag": "",
+    "nodes": [
+      "render",
+      "sim2real"
+    ]
+  },
+  {
+    "id": "drivee2e",
+    "title": "DriveE2E: Closed-Loop Benchmark for End-to-End Autonomous Driving through Real-to-Simulation",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2509.23922",
+    "note": "실제 교차로 시나리오를 CARLA로 옮긴 real-to-sim closed-loop 벤치마크.",
+    "tag": "",
+    "nodes": [
+      "e2ecmp"
+    ]
+  },
+  {
+    "id": "drivearena",
+    "title": "DriveArena: A Closed-loop Generative Simulation Platform for Autonomous Driving",
+    "venue": "ICCV 2025",
+    "url": "https://arxiv.org/abs/2408.00415",
+    "note": "Traffic Manager + 무한 자기회귀 World Dreamer로 영상 기반 정책을 생성형 closed-loop로 평가.",
+    "tag": "",
+    "nodes": [
+      "e2ecmp",
+      "wm"
+    ]
+  },
+  {
+    "id": "cosmosT1",
+    "title": "Cosmos-Transfer1: Conditional World Generation with Adaptive Multimodal Control",
+    "venue": "NVIDIA, 2025",
+    "url": "https://arxiv.org/abs/2503.14492",
+    "note": "세그멘테이션·depth·edge·HDMap·LiDAR 등 다중 조건을 공간별 가중으로 결합해 영상 생성. Sim2Real·AV 데이터 확장.",
+    "tag": "designated",
+    "nodes": [
+      "sim2real",
+      "wm"
+    ]
+  },
+  {
+    "id": "road",
+    "title": "RoaD: aligning open-loop training with closed-loop deployment",
+    "venue": "NVIDIA, 2025",
+    "url": "https://scholar.google.com/scholar?q=RoaD%20closed-loop%20autonomous%20driving%20NVIDIA%20AlpaSim%20covariate%20shift",
+    "note": "AlpaSim과 함께 공개, open-loop 학습과 closed-loop 배포 간 covariate shift 완화.",
+    "tag": "",
+    "nodes": [
+      "sim2real"
+    ]
+  },
+  {
+    "id": "b2drobust",
+    "title": "Bench2Drive-Robust: Benchmarking Closed-Loop Autonomous Driving under Deployment Perturbations",
+    "venue": "2026",
+    "url": "https://arxiv.org/abs/2605.18059",
+    "note": "추론 지연(100/200/500ms, FIFO 버퍼)·카메라 장애·ego 상태 오차를 closed-loop에 주입. fixed/measured 지연 모드.",
+    "tag": "",
+    "nodes": [
+      "latency"
+    ]
+  },
+  {
+    "id": "me2e",
+    "title": "Software-Hardware Co-optimization for Modular E2E AV: Optimization, Simulation Environment and Evaluation Metrics",
+    "venue": "2026",
+    "url": "https://arxiv.org/abs/2601.07393",
+    "note": "실시간 동기 시뮬레이션에서 추론 지연이 한 스텝을 넘으면 이전 제어를 유지하도록 모델링.",
+    "tag": "",
+    "nodes": [
+      "latency"
+    ]
+  },
+  {
+    "id": "flashdrive",
+    "title": "FlashDrive: Flash Vision-Language-Action Inference for Autonomous Driving",
+    "venue": "2026",
+    "url": "https://arxiv.org/abs/2608.12932",
+    "note": "AlpaSim에서 추론+최적화+렌더링 포함 step latency를 지표로 보고.",
+    "tag": "",
+    "nodes": [
+      "latency"
+    ]
+  },
+  {
+    "id": "streaming",
+    "title": "Towards Streaming Perception",
+    "venue": "ECCV 2020",
+    "url": "https://arxiv.org/abs/2005.10420",
+    "note": "추론 지연을 평가에 포함시키는 streaming 평가 프레임 제안.",
+    "tag": "",
+    "nodes": [
+      "latency"
+    ]
+  },
+  {
+    "id": "sd",
+    "title": "Scenario Dreamer: Vectorized Latent Diffusion for Generating Driving Simulation Environments",
+    "venue": "CVPR 2025",
+    "url": "https://arxiv.org/abs/2503.22496",
+    "note": "벡터화 latent diffusion으로 초기 장면(lane graph+agent box) 생성 + return-conditioned AR Transformer로 closed-loop 행동 시뮬레이션. 적대적·장거리 환경 생성.",
+    "tag": "designated",
+    "nodes": [
+      "scengen",
+      "scenmine",
+      "multiagent"
+    ]
+  },
+  {
+    "id": "safesim",
+    "title": "Safe-Sim: Safety-Critical Closed-Loop Traffic Simulation with Diffusion-Controllable Adversaries",
+    "venue": "ECCV 2024",
+    "url": "https://arxiv.org/abs/2401.00391",
+    "note": "denoising에 적대 항을 넣어 충돌 유형·공격성을 제어하는 반응형 적대 에이전트 생성.",
+    "tag": "",
+    "nodes": [
+      "scengen"
+    ]
+  },
+  {
+    "id": "onediff",
+    "title": "One Diffusion Model, Two Roles: Guided Trajectory Planning and Safety-Critical Scenario Generation in Closed-Loop Simulation",
+    "venue": "2026",
+    "url": "https://arxiv.org/abs/2609.04921",
+    "note": "같은 diffusion 모델로 ego 계획과 적대 시나리오 생성을 모두 수행, nuPlan closed-loop에 통합.",
+    "tag": "",
+    "nodes": [
+      "scengen"
+    ]
+  },
+  {
+    "id": "cdd",
+    "title": "Cosmos-Drive-Dreams: Scalable Synthetic Driving Data Generation with World Foundation Models",
+    "venue": "NVIDIA, 2025",
+    "url": "https://arxiv.org/abs/2506.09042",
+    "note": "Cosmos-Drive(HDMap·LiDAR 조건 생성, single→multiview 확장, in-the-wild 주석)로 롱테일 합성 데이터 파이프라인. 3D 차선·객체 검출, 정책 학습 개선.",
+    "tag": "",
+    "nodes": [
+      "scengen",
+      "wm"
+    ]
+  },
+  {
+    "id": "gaia2",
+    "title": "GAIA-2: A Controllable Multi-View Generative World Model for Autonomous Driving",
+    "venue": "Wayve, 2025",
+    "url": "https://arxiv.org/abs/2503.20523",
+    "note": "멀티카메라·에이전트 조건 제어 가능한 latent diffusion 월드모델.",
+    "tag": "",
+    "nodes": [
+      "scengen",
+      "ref_gaia4"
+    ]
+  },
+  {
+    "id": "lidardm",
+    "title": "LidarDM: Generative LiDAR Simulation in a Generated World",
+    "venue": "ICRA 2025",
+    "url": "https://zyrianov.org/lidardm/LidarDM_ICRA2025.pdf",
+    "note": "레이아웃 조건으로 4D LiDAR 시퀀스를 생성. 생성 시나리오를 LiDAR까지 확장.",
+    "tag": "",
+    "nodes": [
+      "scengen",
+      "wm"
+    ]
+  },
+  {
+    "id": "nexus",
+    "title": "Decoupled Diffusion Sparks Adaptive Scene Generation (Nexus)",
+    "venue": "ICCV 2025",
+    "url": "https://arxiv.org/abs/2504.10485",
+    "note": "토큰별 독립 noise 상태로 반응성과 목표 조건을 함께 만족하는 장면 생성. 코너케이스 데이터셋 공개, closed-loop 계획 20% 개선.",
+    "tag": "",
+    "nodes": [
+      "scengen",
+      "multiagent"
+    ]
+  },
+  {
+    "id": "langtraj",
+    "title": "LangTraj: Diffusion Model and Dataset for Language-Conditioned Trajectory Simulation",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2504.11521",
+    "note": "자연어로 전체 에이전트 행동을 조건화하는 diffusion 시뮬레이션과 closed-loop 학습 전략.",
+    "tag": "",
+    "nodes": [
+      "scengen",
+      "multiagent"
+    ]
+  },
+  {
+    "id": "refav",
+    "title": "RefAV: Towards Planning-Centric Scenario Mining",
+    "venue": "CVPR 2026",
+    "url": "https://arxiv.org/abs/2505.20981",
+    "note": "Argoverse 2 로그 1000개에서 자연어 질의 1만 개로 시나리오를 시공간 위치까지 찾아내는 벤치마크. 기성 VLM은 성능이 낮음을 보고.",
+    "tag": "",
+    "nodes": [
+      "scenmine"
+    ]
+  },
+  {
+    "id": "smc2f",
+    "title": "SMc2f: Robust Scenario Mining for Robotic Autonomy from Coarse to Fine",
+    "venue": "2026",
+    "url": "https://arxiv.org/abs/2601.12010",
+    "note": "VLM 1차 필터 + 성공 사례 few-shot + text-trajectory 대조학습으로 RefAV보다 견고한 mining.",
+    "tag": "",
+    "nodes": [
+      "scenmine"
+    ]
+  },
+  {
+    "id": "wor",
+    "title": "Learning to Drive from a World on Rails",
+    "venue": "ICCV 2021",
+    "url": "https://arxiv.org/abs/2105.00636",
+    "note": "'world on rails' 가정(환경은 ego 행동과 무관)의 원조 개념. GAIA-4가 이를 시뮬레이션 제약으로 재정의.",
+    "tag": "",
+    "nodes": [
+      "edit",
+      "ref_gaia4"
+    ]
+  },
+  {
+    "id": "horizonforge",
+    "title": "HorizonForge: Driving Scene Editing with Any Trajectories and Any Vehicles",
+    "venue": "CVPR 2026",
+    "url": "https://arxiv.org/abs/2602.21333",
+    "note": "Gaussian+Mesh 편집 표현과 video diffusion 렌더링으로 ego/agent 궤적 수정·차량 삽입. 편집 벤치마크 HorizonSuite 제안.",
+    "tag": "",
+    "nodes": [
+      "edit"
+    ]
+  },
+  {
+    "id": "scenecrafter",
+    "title": "SceneCrafter: Controllable Multi-View Driving Scene Editing",
+    "venue": "CVPR 2025",
+    "url": "https://arxiv.org/abs/2506.19488",
+    "note": "Waymo. 멀티뷰 3D 일관 편집(에이전트 삽입·삭제, 날씨·시간대 변경).",
+    "tag": "",
+    "nodes": [
+      "edit"
+    ]
+  },
+  {
+    "id": "langdrivectrl",
+    "title": "LangDriveCTRL: Natural Language Controllable Driving Scene Editing with Multi-modal Agents",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2512.17445",
+    "note": "자연어 한 문장으로 객체 삽입·삭제·교체와 다중 객체 행동 편집.",
+    "tag": "",
+    "nodes": [
+      "edit"
+    ]
+  },
+  {
+    "id": "g2editor",
+    "title": "Realistic and Controllable 3D Gaussian-Guided Object Editing for Driving Video Generation (G²Editor)",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2508.20471",
+    "note": "3D box + 3D Gaussian 하이브리드 조건으로 객체 재배치·삽입·삭제.",
+    "tag": "",
+    "nodes": [
+      "edit"
+    ]
+  },
+  {
+    "id": "hdgs",
+    "title": "HDGS: Hierarchical Dynamic Gaussian Splatting for Urban Driving Scenes",
+    "venue": "AAAI 2026",
+    "url": "https://ojs.aaai.org/index.php/AAAI/article/view/42419",
+    "note": "anchor 기반 압축을 동적 도심 장면에 맞게 계층화. 저장 공간 69% 절감에 품질 유지.",
+    "tag": "",
+    "nodes": [
+      "gcomp"
+    ]
+  },
+  {
+    "id": "hac",
+    "title": "HAC: Hash-grid Assisted Context for 3D Gaussian Splatting Compression",
+    "venue": "ECCV 2024",
+    "url": "https://arxiv.org/abs/2403.14530",
+    "note": "anchor 기반 엔트로피 코딩으로 고압축.",
+    "tag": "",
+    "nodes": [
+      "gcomp"
+    ]
+  },
+  {
+    "id": "compact",
+    "title": "Compact 3D Gaussian Representation for Radiance Field",
+    "venue": "CVPR 2024",
+    "url": "https://arxiv.org/abs/2311.13681",
+    "note": "learnable mask + codebook으로 Gaussian 수·속성 압축.",
+    "tag": "",
+    "nodes": [
+      "gcomp"
+    ]
+  },
+  {
+    "id": "ncore",
+    "title": "NCore: Data standard for sensor data reconstruction",
+    "venue": "NVIDIA",
+    "url": "https://developer.nvidia.com/omniverse/nurec.md",
+    "note": "카메라·LiDAR·포즈·타임스탬프를 하나의 표준 표현으로 묶는 NuRec 입력 포맷. 자사 로그를 이 포맷으로 변환하는 것이 통합의 첫 단계.",
+    "tag": "",
+    "nodes": [
+      "sensorplat"
+    ]
+  },
+  {
+    "id": "sensorrtx",
+    "title": "NVIDIA Omniverse Sensor RTX: physics-based sensor simulation",
+    "venue": "NVIDIA",
+    "url": "https://docs.nvidia.com/nurec/av/index.html",
+    "note": "레이트레이싱 기반 카메라·LiDAR·레이더 시뮬레이션. NuRec(실데이터 복원), Cosmos(생성)와 함께 NVIDIA 센서 시뮬 3축 중 하나.",
+    "tag": "",
+    "nodes": [
+      "sensorplat"
+    ]
+  },
+  {
+    "id": "radargen",
+    "title": "RadarGen: Automotive Radar Point Cloud Generation from Cameras",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2512.17897",
+    "note": "멀티뷰 카메라로부터 BEV latent diffusion으로 레이더(RCS·Doppler 포함) 점군을 생성.",
+    "tag": "",
+    "nodes": [
+      "sensorplat",
+      "wm"
+    ]
+  },
+  {
+    "id": "saradar",
+    "title": "Simulate Any Radar: Attribute-Controllable Radar Simulation via Waveform Parameter Embedding",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2506.03134",
+    "note": "파형 파라미터 임베딩으로 레이더 구성을 바꿔가며 RAD 텐서를 시뮬레이션. 새 시점·편집 장면 지원.",
+    "tag": "",
+    "nodes": [
+      "sensorplat"
+    ]
+  },
+  {
+    "id": "cosmosT25",
+    "title": "World Simulation with Video Foundation Models for Physical AI (Cosmos-Predict2.5 / Transfer2.5)",
+    "venue": "NVIDIA, 2025",
+    "url": "https://arxiv.org/abs/2511.00062",
+    "note": "Transfer2.5 auto/multiview: 멀티뷰 주행 시뮬레이션용 조건부 생성(요청하신 'Sim auto' 계열).",
+    "tag": "designated",
+    "nodes": [
+      "wm"
+    ]
+  },
+  {
+    "id": "gaia1",
+    "title": "GAIA-1: A Generative World Model for Autonomous Driving",
+    "venue": "Wayve, 2023",
+    "url": "https://arxiv.org/abs/2309.17080",
+    "note": "비디오·텍스트·액션 토큰 기반 autoregressive 월드모델의 출발점.",
+    "tag": "",
+    "nodes": [
+      "wm",
+      "ref_gaia4"
+    ]
+  }
+]

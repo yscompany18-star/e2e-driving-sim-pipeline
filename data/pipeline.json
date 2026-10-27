@@ -1,0 +1,2312 @@
+{
+ "repo": "yscompany18-star/e2e-driving-sim-pipeline",
+ "sections": [
+  {
+   "id": "s_ol",
+   "label": "Open-loop Simulation",
+   "rq": "RQ1",
+   "color": "0E7C66",
+   "q": "실주행 로그만으로 정적·동적 장면을 편집 가능한 형태로 고충실도 복원할 수 있는가?",
+   "short": "로그를 편집 가능한 장면으로 복원",
+   "problems": [
+    "정적 배경과 동적 객체의 분리 (라벨 노이즈·가림)",
+    "희소한 단일 궤적 관측으로 인한 미관측 영역",
+    "복원된 장면을 편집(삽입·삭제·궤적 변경)할 수 있는 표현"
+   ]
+  },
+  {
+   "id": "s_cl",
+   "label": "Closed-loop Simulation",
+   "rq": "RQ2",
+   "color": "4F46B8",
+   "q": "Ego가 로그 궤적에서 벗어날 때도 센서 품질과 주변 에이전트의 반응성을 유지할 수 있는가?",
+   "short": "궤적 이탈에도 센서·에이전트 현실성 유지",
+   "problems": [
+    "novel view(차선 이동 등)에서의 렌더링 artifact",
+    "log-replay 에이전트의 비반응성 vs 재현성(world-on-rails) trade-off",
+    "다중 에이전트 상호작용의 현실성"
+   ]
+  },
+  {
+   "id": "s_req",
+   "label": "Simulation Requirement",
+   "rq": "RQ3",
+   "color": "B4581A",
+   "q": "시뮬레이션 결과가 실차 성능을 얼마나 신뢰성 있게 예측하는가?",
+   "short": "시뮬 결과가 실차 성능을 예측하는가",
+   "problems": [
+    "자사 센서 구성·타이밍과의 동기화",
+    "충돌률 등 지표의 타당성",
+    "대규모 평가를 위한 속도",
+    "렌더링 품질과 sim-to-real gap",
+    "자사 모델 포함 공정 비교 환경"
+   ]
+  },
+  {
+   "id": "s_eval",
+   "label": "Evaluation Process",
+   "rq": "RQ4",
+   "color": "B3264A",
+   "q": "실차의 inference-to-actuation 지연을 시뮬레이터에서 재현해 평가 왜곡을 막을 수 있는가?",
+   "short": "실차 지연을 재현해 평가 왜곡 제거",
+   "problems": [
+    "모델 추론·제어·렌더링 지연의 분리 계측",
+    "지연을 반영한 closed-loop step 동기화"
+   ]
+  },
+  {
+   "id": "s_aug",
+   "label": "Data Augmentation",
+   "rq": "RQ5",
+   "color": "3C7A1E",
+   "q": "롱테일·안전임계 시나리오를 생성·발굴해 평가와 학습 커버리지를 넓힐 수 있는가?",
+   "short": "롱테일 시나리오 생성·발굴",
+   "problems": [
+    "현실적인 신규 시나리오 생성",
+    "기존 로그에서 희귀 시나리오 검색",
+    "생성·발굴 시나리오를 World Model로 센서 수준 렌더링"
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "id": "root",
+   "kind": "root",
+   "label": "Simulation"
+  },
+  {
+   "id": "dsr",
+   "kind": "task",
+   "sec": "s_ol",
+   "label": "Driving Scene Reconstruction",
+   "problem": "어떤 표현(NeRF/3DGS/3DGUT)이 렌더링 속도·품질·편집성을 동시에 만족하는가?"
+  },
+  {
+   "id": "static",
+   "kind": "scene",
+   "sec": "s_ol",
+   "label": "Static Scene",
+   "problem": "동적 객체를 제거한 깨끗한 배경과 미관측 영역 처리."
+  },
+  {
+   "id": "dynamic",
+   "kind": "scene",
+   "sec": "s_ol",
+   "label": "Dynamic Scene",
+   "problem": "노이즈 있는 박스·포즈로부터 비강체까지 정확히 복원."
+  },
+  {
+   "id": "reactive",
+   "kind": "task",
+   "sec": "s_cl",
+   "label": "Reactive Simulation",
+   "problem": "반응성을 켰을 때 로그와의 일관성·재현성을 어떻게 유지하는가?"
+  },
+  {
+   "id": "egotraj",
+   "kind": "task",
+   "sec": "s_cl",
+   "label": "Following Ego Vehicle Trajectory",
+   "problem": "로그 궤적에서 멀어질수록 커지는 렌더링 artifact."
+  },
+  {
+   "id": "sync",
+   "kind": "task",
+   "sec": "s_req",
+   "label": "자사 데이터 Sensor 동기화",
+   "problem": "센서 간 시간 오프셋·왜곡 모델 불일치가 복원 품질과 정책 입력을 왜곡."
+  },
+  {
+   "id": "metrics",
+   "kind": "task",
+   "sec": "s_req",
+   "label": "Metrics-based Evaluation",
+   "sub": "AlpaSim · Collision rate",
+   "problem": "이진 충돌률만으로 안전성을 판단할 수 있는가? 심각도·책임 구분 필요."
+  },
+  {
+   "id": "speed",
+   "kind": "task",
+   "sec": "s_req",
+   "label": "Simulation Speed",
+   "problem": "렌더링·생성 모델 비용이 평가 규모를 제한."
+  },
+  {
+   "id": "render",
+   "kind": "task",
+   "sec": "s_req",
+   "label": "Rendering Quality",
+   "problem": "PSNR 같은 영상 지표와 closed-loop 지표 간 상관 확보."
+  },
+  {
+   "id": "e2ecmp",
+   "kind": "task",
+   "sec": "s_req",
+   "label": "E2E Model Comparison 환경",
+   "sub": "자사 모델 포함",
+   "problem": "모델마다 다른 센서 입력·주기를 공통 인터페이스로 맞추기."
+  },
+  {
+   "id": "sim2real",
+   "kind": "task",
+   "sec": "s_req",
+   "label": "Sim-to-Real gap 최소화",
+   "problem": "시뮬 지표가 실차 성능의 대리 지표로 타당한지 검증."
+  },
+  {
+   "id": "latency",
+   "kind": "task",
+   "sec": "s_eval",
+   "label": "E2E Inference-to-Actuation Latency 동기화",
+   "problem": "지연을 무시하면 시뮬에서 과대평가된 성능이 나옴."
+  },
+  {
+   "id": "scengen",
+   "kind": "task",
+   "sec": "s_aug",
+   "label": "Scenario Generation",
+   "sub": "Scenario Dreamer",
+   "problem": "현실적이면서 도전적인(adversarial) 시나리오 생성."
+  },
+  {
+   "id": "scenmine",
+   "kind": "task",
+   "sec": "s_aug",
+   "label": "Scenario Mining",
+   "sub": "Scenario Dreamer",
+   "problem": "Scenario Dreamer는 생성 모델이므로, 검색(mining) 측면은 별도 방법과 결합 필요."
+  },
+  {
+   "id": "edit",
+   "kind": "tech",
+   "label": "Driving Scene Editing",
+   "sub": "World-on-Rails",
+   "problem": "편집 후에도 물리적·시각적 일관성 유지."
+  },
+  {
+   "id": "multiagent",
+   "kind": "tech",
+   "label": "Multi-Agent Simulation",
+   "problem": "다수 에이전트의 현실적·제어 가능한 동시 행동 생성."
+  },
+  {
+   "id": "rqi",
+   "kind": "tech",
+   "label": "Reconstruction Quality Improvement",
+   "sub": "ArtiFixer · OneFixer",
+   "problem": "실시간성(online)과 시간적 일관성을 동시에 만족."
+  },
+  {
+   "id": "gcomp",
+   "kind": "tech",
+   "label": "Gaussian Compression",
+   "problem": "압축률 대비 렌더링 품질(→정책 행동) 손실 최소화."
+  },
+  {
+   "id": "sensorplat",
+   "kind": "tech",
+   "label": "Sensor Integration Platform",
+   "sub": "NVIDIA · NCore · NuRec · AlpaSim",
+   "problem": "자사 센서 rig(카메라 모델·셔터·LiDAR·타이밍)를 NCore/NuRec이 지원하는 형태로 정확히 옮기는 것. NuRec 공식 지원 rig 외 구성에서의 품질 저하 검증 필요."
+  },
+  {
+   "id": "wm",
+   "kind": "wm",
+   "label": "World Model",
+   "sub": "Conditional Generation · Cosmos-Transfer",
+   "problem": "조건 충실도와 멀티뷰·시간 일관성, 그리고 실시간성."
+  }
+ ],
+ "edges": [
+  [
+   "root",
+   "s_ol",
+   "tree"
+  ],
+  [
+   "root",
+   "s_cl",
+   "tree"
+  ],
+  [
+   "root",
+   "s_req",
+   "tree"
+  ],
+  [
+   "root",
+   "s_eval",
+   "tree"
+  ],
+  [
+   "root",
+   "s_aug",
+   "tree"
+  ],
+  [
+   "s_ol",
+   "dsr",
+   "tree"
+  ],
+  [
+   "dsr",
+   "static",
+   "tree"
+  ],
+  [
+   "dsr",
+   "dynamic",
+   "tree"
+  ],
+  [
+   "s_cl",
+   "reactive",
+   "tree"
+  ],
+  [
+   "s_cl",
+   "egotraj",
+   "tree"
+  ],
+  [
+   "s_req",
+   "sync",
+   "tree"
+  ],
+  [
+   "s_req",
+   "metrics",
+   "tree"
+  ],
+  [
+   "s_req",
+   "speed",
+   "tree"
+  ],
+  [
+   "s_req",
+   "render",
+   "tree"
+  ],
+  [
+   "s_req",
+   "e2ecmp",
+   "tree"
+  ],
+  [
+   "s_req",
+   "sim2real",
+   "tree"
+  ],
+  [
+   "s_eval",
+   "latency",
+   "tree"
+  ],
+  [
+   "s_aug",
+   "scengen",
+   "tree"
+  ],
+  [
+   "s_aug",
+   "scenmine",
+   "tree"
+  ],
+  [
+   "static",
+   "edit",
+   "link"
+  ],
+  [
+   "dynamic",
+   "edit",
+   "link"
+  ],
+  [
+   "dynamic",
+   "multiagent",
+   "link"
+  ],
+  [
+   "static",
+   "rqi",
+   "link"
+  ],
+  [
+   "dynamic",
+   "rqi",
+   "link"
+  ],
+  [
+   "reactive",
+   "multiagent",
+   "link"
+  ],
+  [
+   "egotraj",
+   "rqi",
+   "link"
+  ],
+  [
+   "render",
+   "rqi",
+   "link"
+  ],
+  [
+   "multiagent",
+   "wm",
+   "link"
+  ],
+  [
+   "scengen",
+   "wm",
+   "link"
+  ],
+  [
+   "scenmine",
+   "wm",
+   "link"
+  ],
+  [
+   "sync",
+   "sensorplat",
+   "link"
+  ],
+  [
+   "e2ecmp",
+   "sensorplat",
+   "link"
+  ],
+  [
+   "sim2real",
+   "sensorplat",
+   "link"
+  ],
+  [
+   "speed",
+   "gcomp",
+   "proposed"
+  ],
+  [
+   "latency",
+   "sensorplat",
+   "proposed"
+  ]
+ ],
+ "px": {
+  "root": {
+   "x": 33.6,
+   "y": 359,
+   "w": 110.4,
+   "h": 67.2
+  },
+  "s_ol": {
+   "x": 165.1,
+   "y": 103.7,
+   "w": 182.4,
+   "h": 76.8
+  },
+  "s_cl": {
+   "x": 165.1,
+   "y": 207.4,
+   "w": 182.4,
+   "h": 76.8
+  },
+  "s_req": {
+   "x": 165.1,
+   "y": 356.6,
+   "w": 182.4,
+   "h": 91.2
+  },
+  "s_eval": {
+   "x": 165.1,
+   "y": 517.4,
+   "w": 182.4,
+   "h": 63.4
+  },
+  "s_aug": {
+   "x": 165.1,
+   "y": 604.8,
+   "w": 182.4,
+   "h": 76.8
+  },
+  "dsr": {
+   "x": 374.4,
+   "y": 115.7,
+   "w": 230.4,
+   "h": 52.8
+  },
+  "static": {
+   "x": 628.8,
+   "y": 102.7,
+   "w": 110.4,
+   "h": 34.6
+  },
+  "dynamic": {
+   "x": 628.8,
+   "y": 146.9,
+   "w": 110.4,
+   "h": 34.6
+  },
+  "reactive": {
+   "x": 374.4,
+   "y": 201.6,
+   "w": 230.4,
+   "h": 40.3
+  },
+  "egotraj": {
+   "x": 374.4,
+   "y": 252.5,
+   "w": 230.4,
+   "h": 34.6
+  },
+  "sync": {
+   "x": 374.4,
+   "y": 306.7,
+   "w": 230.4,
+   "h": 27.8
+  },
+  "metrics": {
+   "x": 374.4,
+   "y": 339.4,
+   "w": 230.4,
+   "h": 27.8
+  },
+  "speed": {
+   "x": 374.4,
+   "y": 372,
+   "w": 230.4,
+   "h": 27.8
+  },
+  "render": {
+   "x": 374.4,
+   "y": 404.6,
+   "w": 230.4,
+   "h": 27.8
+  },
+  "e2ecmp": {
+   "x": 374.4,
+   "y": 437.3,
+   "w": 230.4,
+   "h": 27.8
+  },
+  "sim2real": {
+   "x": 374.4,
+   "y": 469.9,
+   "w": 230.4,
+   "h": 27.8
+  },
+  "latency": {
+   "x": 374.4,
+   "y": 526.1,
+   "w": 230.4,
+   "h": 46.1
+  },
+  "scengen": {
+   "x": 374.4,
+   "y": 599,
+   "w": 230.4,
+   "h": 40.3
+  },
+  "scenmine": {
+   "x": 374.4,
+   "y": 648,
+   "w": 230.4,
+   "h": 38.4
+  },
+  "edit": {
+   "x": 792,
+   "y": 115.7,
+   "w": 206.4,
+   "h": 52.8
+  },
+  "multiagent": {
+   "x": 792,
+   "y": 201.6,
+   "w": 206.4,
+   "h": 40.3
+  },
+  "rqi": {
+   "x": 792,
+   "y": 245.8,
+   "w": 206.4,
+   "h": 48
+  },
+  "gcomp": {
+   "x": 792,
+   "y": 365.8,
+   "w": 206.4,
+   "h": 40.3
+  },
+  "sensorplat": {
+   "x": 792,
+   "y": 443.5,
+   "w": 206.4,
+   "h": 48
+  },
+  "wm": {
+   "x": 1036.8,
+   "y": 178.6,
+   "w": 206.4,
+   "h": 86.4
+  }
+ },
+ "segs": [
+  {
+   "pts": [
+    [
+     144,
+     392.6
+    ],
+    [
+     153.6,
+     392.6
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "root",
+    "s_ol",
+    "s_cl",
+    "s_req",
+    "s_eval",
+    "s_aug"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     153.6,
+     142.1
+    ],
+    [
+     153.6,
+     643.2
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "root",
+    "s_ol",
+    "s_cl",
+    "s_req",
+    "s_eval",
+    "s_aug"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     153.6,
+     142.1
+    ],
+    [
+     165.1,
+     142.1
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "root",
+    "s_ol"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     153.6,
+     245.8
+    ],
+    [
+     165.1,
+     245.8
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "root",
+    "s_cl"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     153.6,
+     402.2
+    ],
+    [
+     165.1,
+     402.2
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "root",
+    "s_req"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     153.6,
+     549.1
+    ],
+    [
+     165.1,
+     549.1
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "root",
+    "s_eval"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     153.6,
+     643.2
+    ],
+    [
+     165.1,
+     643.2
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "root",
+    "s_aug"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     347.5,
+     142.1
+    ],
+    [
+     361,
+     142.1
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_ol",
+    "dsr"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     142.1
+    ],
+    [
+     361,
+     142.1
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_ol",
+    "dsr"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     142.1
+    ],
+    [
+     374.4,
+     142.1
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_ol",
+    "dsr"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     347.5,
+     245.8
+    ],
+    [
+     361,
+     245.8
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_cl",
+    "reactive",
+    "egotraj"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     221.8
+    ],
+    [
+     361,
+     269.8
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_cl",
+    "reactive",
+    "egotraj"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     221.8
+    ],
+    [
+     374.4,
+     221.8
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_cl",
+    "reactive"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     269.8
+    ],
+    [
+     374.4,
+     269.8
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_cl",
+    "egotraj"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     347.5,
+     402.2
+    ],
+    [
+     361,
+     402.2
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_req",
+    "sync",
+    "metrics",
+    "speed",
+    "render",
+    "e2ecmp",
+    "sim2real"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     320.6
+    ],
+    [
+     361,
+     483.8
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_req",
+    "sync",
+    "metrics",
+    "speed",
+    "render",
+    "e2ecmp",
+    "sim2real"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     320.6
+    ],
+    [
+     374.4,
+     320.6
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_req",
+    "sync"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     353.3
+    ],
+    [
+     374.4,
+     353.3
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_req",
+    "metrics"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     385.9
+    ],
+    [
+     374.4,
+     385.9
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_req",
+    "speed"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     418.6
+    ],
+    [
+     374.4,
+     418.6
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_req",
+    "render"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     451.2
+    ],
+    [
+     374.4,
+     451.2
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_req",
+    "e2ecmp"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     483.8
+    ],
+    [
+     374.4,
+     483.8
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_req",
+    "sim2real"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     347.5,
+     549.1
+    ],
+    [
+     361,
+     549.1
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_eval",
+    "latency"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     549.1
+    ],
+    [
+     361,
+     549.1
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_eval",
+    "latency"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     549.1
+    ],
+    [
+     374.4,
+     549.1
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_eval",
+    "latency"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     347.5,
+     643.2
+    ],
+    [
+     361,
+     643.2
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_aug",
+    "scengen",
+    "scenmine"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     619.2
+    ],
+    [
+     361,
+     667.2
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_aug",
+    "scengen",
+    "scenmine"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     619.2
+    ],
+    [
+     374.4,
+     619.2
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_aug",
+    "scengen"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     361,
+     667.2
+    ],
+    [
+     374.4,
+     667.2
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "s_aug",
+    "scenmine"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     604.8,
+     142.1
+    ],
+    [
+     617.3,
+     142.1
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "dsr",
+    "static",
+    "dynamic"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     617.3,
+     120
+    ],
+    [
+     617.3,
+     164.2
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "dsr",
+    "static",
+    "dynamic"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     617.3,
+     120
+    ],
+    [
+     628.8,
+     120
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "dsr",
+    "static"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     617.3,
+     164.2
+    ],
+    [
+     628.8,
+     164.2
+    ]
+   ],
+   "cls": "tree",
+   "ids": [
+    "dsr",
+    "dynamic"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     739.2,
+     120
+    ],
+    [
+     765.1,
+     120
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "static",
+    "edit",
+    "rqi"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     739.2,
+     164.2
+    ],
+    [
+     765.1,
+     164.2
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "dynamic",
+    "edit",
+    "rqi",
+    "multiagent"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     765.1,
+     120
+    ],
+    [
+     765.1,
+     269.8
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "static",
+    "dynamic",
+    "edit",
+    "rqi",
+    "multiagent"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     765.1,
+     142.1
+    ],
+    [
+     792,
+     142.1
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "static",
+    "dynamic",
+    "edit"
+   ],
+   "arrow": true
+  },
+  {
+   "pts": [
+    [
+     604.8,
+     221.8
+    ],
+    [
+     792,
+     221.8
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "reactive",
+    "multiagent",
+    "dynamic"
+   ],
+   "arrow": true
+  },
+  {
+   "pts": [
+    [
+     604.8,
+     269.8
+    ],
+    [
+     792,
+     269.8
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "egotraj",
+    "rqi",
+    "render",
+    "static",
+    "dynamic"
+   ],
+   "arrow": true
+  },
+  {
+   "pts": [
+    [
+     604.8,
+     418.6
+    ],
+    [
+     691.2,
+     418.6
+    ],
+    [
+     691.2,
+     269.8
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "render",
+    "rqi"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     604.8,
+     320.6
+    ],
+    [
+     731.5,
+     320.6
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "sync",
+    "sensorplat"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     604.8,
+     451.2
+    ],
+    [
+     731.5,
+     451.2
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "e2ecmp",
+    "sensorplat"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     604.8,
+     483.8
+    ],
+    [
+     731.5,
+     483.8
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "sim2real",
+    "sensorplat"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     731.5,
+     320.6
+    ],
+    [
+     731.5,
+     483.8
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "sync",
+    "e2ecmp",
+    "sim2real",
+    "sensorplat"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     731.5,
+     467.5
+    ],
+    [
+     792,
+     467.5
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "sync",
+    "e2ecmp",
+    "sim2real",
+    "sensorplat"
+   ],
+   "arrow": true
+  },
+  {
+   "pts": [
+    [
+     998.4,
+     221.8
+    ],
+    [
+     1036.8,
+     221.8
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "multiagent",
+    "wm"
+   ],
+   "arrow": true
+  },
+  {
+   "pts": [
+    [
+     604.8,
+     619.2
+    ],
+    [
+     1140,
+     619.2
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "scengen",
+    "wm"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     604.8,
+     667.2
+    ],
+    [
+     1140,
+     667.2
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "scenmine",
+    "wm"
+   ],
+   "arrow": false
+  },
+  {
+   "pts": [
+    [
+     1140,
+     667.2
+    ],
+    [
+     1140,
+     265
+    ]
+   ],
+   "cls": "link",
+   "ids": [
+    "scengen",
+    "scenmine",
+    "wm"
+   ],
+   "arrow": true
+  },
+  {
+   "pts": [
+    [
+     604.8,
+     385.9
+    ],
+    [
+     792,
+     385.9
+    ]
+   ],
+   "cls": "prop",
+   "ids": [
+    "speed",
+    "gcomp"
+   ],
+   "arrow": true
+  },
+  {
+   "pts": [
+    [
+     604.8,
+     549.1
+    ],
+    [
+     894.7,
+     549.1
+    ],
+    [
+     894.7,
+     491.5
+    ]
+   ],
+   "cls": "prop",
+   "ids": [
+    "latency",
+    "sensorplat"
+   ],
+   "arrow": true
+  }
+ ],
+ "bands": [
+  {
+   "id": "s_ol",
+   "y": 94.1,
+   "h": 96
+  },
+  {
+   "id": "s_cl",
+   "y": 197.8,
+   "h": 96
+  },
+  {
+   "id": "s_req",
+   "y": 301.4,
+   "h": 201.6
+  },
+  {
+   "id": "s_eval",
+   "y": 510.7,
+   "h": 76.8
+  },
+  {
+   "id": "s_aug",
+   "y": 595.2,
+   "h": 96
+  }
+ ],
+ "cfg": {
+  "dsr": [
+   {
+    "k": "representation",
+    "l": "장면 표현",
+    "t": "sel",
+    "o": [
+     "3DGUT (NuRec)",
+     "3DGS",
+     "NeRF (EmerNeRF)"
+    ],
+    "d": "3DGUT (NuRec)"
+   },
+   {
+    "k": "input_sensors",
+    "l": "입력 센서",
+    "t": "sel",
+    "o": [
+     "Camera + LiDAR",
+     "Camera only"
+    ],
+    "d": "Camera + LiDAR",
+    "h": "NuRec은 camera-only도 가능하나 LiDAR가 있으면 기하 정확도가 높음"
+   },
+   {
+    "k": "dynamic_model",
+    "l": "동적 객체 모델",
+    "t": "sel",
+    "o": [
+     "OmniRe (scene graph)",
+     "Street Gaussians (box)"
+    ],
+    "d": "OmniRe (scene graph)"
+   },
+   {
+    "k": "data_format",
+    "l": "로그 포맷",
+    "t": "sel",
+    "o": [
+     "NCore",
+     "자사 포맷 → NCore 변환"
+    ],
+    "d": "NCore"
+   },
+   {
+    "k": "iterations",
+    "l": "학습 iteration",
+    "t": "num",
+    "d": 30000
+   }
+  ],
+  "static": [
+   {
+    "k": "depth_sup",
+    "l": "Depth supervision",
+    "t": "sel",
+    "o": [
+     "LiDAR",
+     "Mono depth",
+     "없음"
+    ],
+    "d": "LiDAR"
+   },
+   {
+    "k": "sky_model",
+    "l": "Sky 별도 모델링",
+    "t": "bool",
+    "d": true
+   },
+   {
+    "k": "dynamic_mask",
+    "l": "동적 영역 마스킹",
+    "t": "sel",
+    "o": [
+     "Semantic mask",
+     "3D box",
+     "없음"
+    ],
+    "d": "Semantic mask"
+   }
+  ],
+  "dynamic": [
+   {
+    "k": "classes",
+    "l": "복원 대상 클래스",
+    "t": "multi",
+    "o": [
+     "Vehicle",
+     "Pedestrian",
+     "Cyclist"
+    ],
+    "d": [
+     "Vehicle",
+     "Pedestrian"
+    ]
+   },
+   {
+    "k": "pose_refine",
+    "l": "Actor pose refinement",
+    "t": "bool",
+    "d": true
+   },
+   {
+    "k": "non_rigid",
+    "l": "비강체(보행자) 모델링",
+    "t": "bool",
+    "d": true
+   }
+  ],
+  "reactive": [
+   {
+    "k": "mode",
+    "l": "에이전트 모드",
+    "t": "sel",
+    "o": [
+     "world-on-rails",
+     "reactive"
+    ],
+    "d": "world-on-rails",
+    "h": "world-on-rails: 타 에이전트는 로그 그대로 (GAIA-4 참고자료의 개념)"
+   },
+   {
+    "k": "agent_model",
+    "l": "행동 모델",
+    "t": "sel",
+    "o": [
+     "SMART + CAT-K",
+     "SMART-R1",
+     "Log replay",
+     "GAIA-4 (참고 · 비공개)"
+    ],
+    "d": "SMART + CAT-K"
+   },
+   {
+    "k": "replan_hz",
+    "l": "Replan 주기",
+    "t": "num",
+    "d": 10,
+    "u": "Hz"
+   },
+   {
+    "k": "rollout_s",
+    "l": "Rollout 길이",
+    "t": "num",
+    "d": 20,
+    "u": "s"
+   }
+  ],
+  "egotraj": [
+   {
+    "k": "max_dev_m",
+    "l": "로그 궤적 최대 이탈 허용",
+    "t": "num",
+    "d": 4,
+    "u": "m",
+    "h": "AlpaSim 프로토콜은 4m 이내 incident만 집계"
+   },
+   {
+    "k": "controller",
+    "l": "추종 제어기",
+    "t": "sel",
+    "o": [
+     "Kinematic bicycle",
+     "PID tracking"
+    ],
+    "d": "Kinematic bicycle"
+   },
+   {
+    "k": "step_ms",
+    "l": "시뮬레이션 step",
+    "t": "num",
+    "d": 100,
+    "u": "ms"
+   },
+   {
+    "k": "fixer",
+    "l": "렌더 보정",
+    "t": "sel",
+    "o": [
+     "OneFixer",
+     "ArtiFixer",
+     "Difix3D+ (online)",
+     "없음"
+    ],
+    "d": "OneFixer"
+   }
+  ],
+  "sync": [
+   {
+    "k": "camera_model",
+    "l": "카메라 모델",
+    "t": "sel",
+    "o": [
+     "f-theta",
+     "fisheye",
+     "pinhole"
+    ],
+    "d": "f-theta"
+   },
+   {
+    "k": "shutter",
+    "l": "셔터",
+    "t": "sel",
+    "o": [
+     "rolling",
+     "global"
+    ],
+    "d": "rolling"
+   },
+   {
+    "k": "cam_time_offset_ms",
+    "l": "카메라-LiDAR 시간 오프셋",
+    "t": "num",
+    "d": 0,
+    "u": "ms"
+   },
+   {
+    "k": "time_ref",
+    "l": "시간 기준",
+    "t": "sel",
+    "o": [
+     "카메라 노출 중앙",
+     "LiDAR sweep 시작",
+     "GNSS/PTP"
+    ],
+    "d": "카메라 노출 중앙"
+   },
+   {
+    "k": "calib_file",
+    "l": "캘리브레이션 파일 경로",
+    "t": "text",
+    "d": "calib/rig_v1.yaml"
+   }
+  ],
+  "metrics": [
+   {
+    "k": "metrics",
+    "l": "평가 지표",
+    "t": "multi",
+    "o": [
+     "Collision",
+     "Off-road",
+     "Wrong lane",
+     "Route completion",
+     "Collision severity (CCM)"
+    ],
+    "d": [
+     "Collision",
+     "Off-road",
+     "Route completion"
+    ]
+   },
+   {
+    "k": "incident_radius_m",
+    "l": "Incident 집계 반경 (GT 궤적 기준)",
+    "t": "num",
+    "d": 4,
+    "u": "m"
+   },
+   {
+    "k": "aggregation",
+    "l": "시간 집계",
+    "t": "sel",
+    "o": [
+     "max over time",
+     "mean over time"
+    ],
+    "d": "max over time"
+   }
+  ],
+  "speed": [
+   {
+    "k": "target_fps",
+    "l": "목표 FPS",
+    "t": "num",
+    "d": 10,
+    "u": "fps"
+   },
+   {
+    "k": "gpus",
+    "l": "GPU 수",
+    "t": "num",
+    "d": 4
+   },
+   {
+    "k": "parallel_scenes",
+    "l": "동시 실행 장면 수",
+    "t": "num",
+    "d": 8
+   },
+   {
+    "k": "renderer",
+    "l": "센서 렌더러",
+    "t": "sel",
+    "o": [
+     "NuRec (gRPC)",
+     "Generative (OmniDreams 계열)"
+    ],
+    "d": "NuRec (gRPC)"
+   }
+  ],
+  "render": [
+   {
+    "k": "image_metrics",
+    "l": "영상 지표",
+    "t": "multi",
+    "o": [
+     "PSNR",
+     "SSIM",
+     "LPIPS",
+     "FID/FVD"
+    ],
+    "d": [
+     "PSNR",
+     "LPIPS"
+    ]
+   },
+   {
+    "k": "lane_shift_m",
+    "l": "평가용 궤적 shift",
+    "t": "num",
+    "d": 3,
+    "u": "m"
+   },
+   {
+    "k": "fixer_mode",
+    "l": "Fixer 모드",
+    "t": "sel",
+    "o": [
+     "online (render-time)",
+     "offline (distill)",
+     "both"
+    ],
+    "d": "online (render-time)"
+   },
+   {
+    "k": "closed_loop_check",
+    "l": "Closed-loop 지표와 상관 분석",
+    "t": "bool",
+    "d": true
+   }
+  ],
+  "e2ecmp": [
+   {
+    "k": "models",
+    "l": "비교 모델 목록",
+    "t": "text",
+    "d": "자사 모델, Alpamayo, 공개 baseline"
+   },
+   {
+    "k": "interface",
+    "l": "모델 인터페이스",
+    "t": "sel",
+    "o": [
+     "gRPC container (AlpaSim)",
+     "Python API"
+    ],
+    "d": "gRPC container (AlpaSim)"
+   },
+   {
+    "k": "control_hz",
+    "l": "제어 주기",
+    "t": "num",
+    "d": 10,
+    "u": "Hz"
+   },
+   {
+    "k": "scenes",
+    "l": "평가 장면 수",
+    "t": "num",
+    "d": 500
+   }
+  ],
+  "sim2real": [
+   {
+    "k": "validation",
+    "l": "검증 방식",
+    "t": "sel",
+    "o": [
+     "정책 순위 상관 (sim vs real)",
+     "지표 값 상관",
+     "둘 다"
+    ],
+    "d": "정책 순위 상관 (sim vs real)"
+   },
+   {
+    "k": "sensor_sim",
+    "l": "센서 시뮬레이터",
+    "t": "sel",
+    "o": [
+     "NuRec",
+     "Generative world model",
+     "Cosmos-Transfer 보정"
+    ],
+    "d": "NuRec"
+   },
+   {
+    "k": "real_scenes",
+    "l": "실차 비교 장면 수",
+    "t": "num",
+    "d": 50
+   }
+  ],
+  "latency": [
+   {
+    "k": "inference_ms",
+    "l": "모델 추론 지연",
+    "t": "num",
+    "d": 120,
+    "u": "ms"
+   },
+   {
+    "k": "actuation_ms",
+    "l": "제어 명령→구동 지연",
+    "t": "num",
+    "d": 50,
+    "u": "ms"
+   },
+   {
+    "k": "sensor_ms",
+    "l": "센서→입력 지연",
+    "t": "num",
+    "d": 30,
+    "u": "ms"
+   },
+   {
+    "k": "latency_mode",
+    "l": "지연 적용 방식",
+    "t": "sel",
+    "o": [
+     "고정값",
+     "실측 분포 샘플링"
+    ],
+    "d": "고정값"
+   }
+  ],
+  "scengen": [
+   {
+    "k": "generator",
+    "l": "생성기",
+    "t": "sel",
+    "o": [
+     "Scenario Dreamer",
+     "Cosmos-Drive-Dreams"
+    ],
+    "d": "Scenario Dreamer"
+   },
+   {
+    "k": "adversarial",
+    "l": "적대적 행동 (exponential tilting)",
+    "t": "bool",
+    "d": true
+   },
+   {
+    "k": "density",
+    "l": "장면 밀도",
+    "t": "sel",
+    "o": [
+     "normal",
+     "dense",
+     "sparse"
+    ],
+    "d": "normal"
+   },
+   {
+    "k": "num_scenes",
+    "l": "생성 장면 수",
+    "t": "num",
+    "d": 1000
+   },
+   {
+    "k": "to_world_model",
+    "l": "World Model로 센서 렌더링",
+    "t": "bool",
+    "d": true
+   }
+  ],
+  "scenmine": [
+   {
+    "k": "query",
+    "l": "검색 방식",
+    "t": "sel",
+    "o": [
+     "자연어 질의 (RefAV)",
+     "규칙 기반"
+    ],
+    "d": "자연어 질의 (RefAV)"
+   },
+   {
+    "k": "targets",
+    "l": "대상 시나리오",
+    "t": "text",
+    "d": "cut-in, unprotected left turn, 보행자 무단횡단"
+   },
+   {
+    "k": "source",
+    "l": "로그 소스",
+    "t": "text",
+    "d": "자사 주행 로그"
+   },
+   {
+    "k": "top_k",
+    "l": "시나리오당 추출 수",
+    "t": "num",
+    "d": 50
+   },
+   {
+    "k": "to_world_model",
+    "l": "World Model로 변형 생성",
+    "t": "bool",
+    "d": true
+   }
+  ],
+  "edit": [
+   {
+    "k": "ops",
+    "l": "편집 연산",
+    "t": "multi",
+    "o": [
+     "world-on-rails counterfactual",
+     "Actor 삽입",
+     "Actor 삭제",
+     "Actor 궤적 변경"
+    ],
+    "d": [
+     "world-on-rails counterfactual"
+    ]
+   },
+   {
+    "k": "consistency_check",
+    "l": "편집 후 일관성 검사",
+    "t": "bool",
+    "d": true
+   }
+  ],
+  "multiagent": [
+   {
+    "k": "behavior",
+    "l": "행동 모델",
+    "t": "sel",
+    "o": [
+     "SMART + CAT-K",
+     "SMART-R1",
+     "Scenario Dreamer agent",
+     "GAIA-4 (참고 · 비공개)"
+    ],
+    "d": "SMART + CAT-K"
+   },
+   {
+    "k": "max_agents",
+    "l": "최대 에이전트 수",
+    "t": "num",
+    "d": 32
+   },
+   {
+    "k": "controllable",
+    "l": "에이전트 개별 제어",
+    "t": "bool",
+    "d": true
+   }
+  ],
+  "rqi": [
+   {
+    "k": "fixer",
+    "l": "Fixer 모델",
+    "t": "sel",
+    "o": [
+     "OneFixer",
+     "ArtiFixer",
+     "Difix3D+ / NVIDIA Fixer"
+    ],
+    "d": "OneFixer"
+   },
+   {
+    "k": "mode",
+    "l": "적용 모드",
+    "t": "sel",
+    "o": [
+     "online (render-time)",
+     "offline (3D distill)",
+     "both"
+    ],
+    "d": "online (render-time)"
+   },
+   {
+    "k": "latency_budget_ms",
+    "l": "프레임당 지연 예산",
+    "t": "num",
+    "d": 50,
+    "u": "ms"
+   }
+  ],
+  "gcomp": [
+   {
+    "k": "method",
+    "l": "압축 방법",
+    "t": "sel",
+    "o": [
+     "LightGaussian",
+     "HAC",
+     "Compact3D"
+    ],
+    "d": "LightGaussian"
+   },
+   {
+    "k": "target_mb",
+    "l": "장면당 목표 용량",
+    "t": "num",
+    "d": 200,
+    "u": "MB"
+   },
+   {
+    "k": "max_psnr_drop",
+    "l": "허용 PSNR 하락",
+    "t": "num",
+    "d": 0.5,
+    "u": "dB"
+   }
+  ],
+  "sensorplat": [
+   {
+    "k": "vendor",
+    "l": "플랫폼",
+    "t": "sel",
+    "o": [
+     "NVIDIA (NCore · NuRec · AlpaSim)"
+    ],
+    "d": "NVIDIA (NCore · NuRec · AlpaSim)"
+   },
+   {
+    "k": "rig",
+    "l": "센서 rig",
+    "t": "sel",
+    "o": [
+     "자사 rig (커스텀)",
+     "Hyperion 8.1"
+    ],
+    "d": "자사 rig (커스텀)",
+    "h": "NuRec 공식 지원 rig는 Hyperion 8.1, 커스텀 rig는 품질 검증 필요"
+   },
+   {
+    "k": "sensors",
+    "l": "센서",
+    "t": "multi",
+    "o": [
+     "Camera",
+     "LiDAR",
+     "Radar"
+    ],
+    "d": [
+     "Camera",
+     "LiDAR"
+    ]
+   },
+   {
+    "k": "camera_model",
+    "l": "카메라 모델",
+    "t": "sel",
+    "o": [
+     "f-theta",
+     "fisheye",
+     "pinhole"
+    ],
+    "d": "f-theta"
+   },
+   {
+    "k": "shutter",
+    "l": "셔터",
+    "t": "sel",
+    "o": [
+     "rolling",
+     "global"
+    ],
+    "d": "rolling"
+   },
+   {
+    "k": "renderer",
+    "l": "센서 렌더러",
+    "t": "sel",
+    "o": [
+     "NuRec (실데이터 복원)",
+     "Omniverse Sensor RTX (물리 기반)",
+     "Cosmos (생성)"
+    ],
+    "d": "NuRec (실데이터 복원)"
+   },
+   {
+    "k": "nurec_grpc",
+    "l": "NuRec gRPC endpoint",
+    "t": "text",
+    "d": "host:port"
+   },
+   {
+    "k": "artificial_latency",
+    "l": "AlpaSim 인위적 latency 적용",
+    "t": "bool",
+    "d": true
+   }
+  ],
+  "wm": [
+   {
+    "k": "model",
+    "l": "모델",
+    "t": "sel",
+    "o": [
+     "Cosmos-Transfer2.5-2B auto/multiview",
+     "Cosmos-Transfer1-7B-Sample-AV",
+     "GAIA-4 (참고 · 비공개)"
+    ],
+    "d": "Cosmos-Transfer2.5-2B auto/multiview"
+   },
+   {
+    "k": "controls",
+    "l": "조건 입력",
+    "t": "multi",
+    "o": [
+     "HDMap",
+     "LiDAR",
+     "Depth",
+     "Segmentation",
+     "Edge"
+    ],
+    "d": [
+     "HDMap",
+     "LiDAR"
+    ]
+   },
+   {
+    "k": "views",
+    "l": "카메라 뷰 수",
+    "t": "num",
+    "d": 6
+   },
+   {
+    "k": "clip_s",
+    "l": "클립 길이",
+    "t": "num",
+    "d": 5,
+    "u": "s"
+   },
+   {
+    "k": "prompt",
+    "l": "텍스트 프롬프트",
+    "t": "text",
+    "d": "rainy night, wet road"
+   }
+  ]
+ },
+ "refs": {
+  "ref_gaia4": {
+   "label": "GAIA-4",
+   "sub": "Wayve · Simulation 2.0 · 참고자료 (비공개 모델)",
+   "applies": [
+    "reactive",
+    "edit",
+    "multiagent",
+    "wm",
+    "sensorplat",
+    "sim2real"
+   ]
+  }
+ }
+}

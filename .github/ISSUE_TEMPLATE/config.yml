@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 사이트 보기
+    url: https://yscompany18-star.github.io/e2e-driving-sim-pipeline/
+    about: 파이프라인과 각 항목 설명

@@ -1,0 +1,51 @@
+name: 논문 추가
+description: 파이프라인 항목에 Related Work를 추가합니다. 관리자가 approved 라벨을 붙이면 자동 반영됩니다.
+title: "[논문] "
+labels: ["paper"]
+body:
+  - type: input
+    id: paper_title
+    attributes: { label: 논문 제목 }
+    validations: { required: true }
+  - type: input
+    id: paper_url
+    attributes: { label: 링크, description: "arXiv, 학회 페이지 등 (https://...)" }
+    validations: { required: true }
+  - type: input
+    id: paper_venue
+    attributes: { label: 학회 · 연도, placeholder: "CVPR 2025" }
+  - type: dropdown
+    id: paper_nodes
+    attributes:
+      label: 연결할 항목
+      multiple: true
+      options:
+        - "dsr — Driving Scene Reconstruction"
+        - "static — Static Scene"
+        - "dynamic — Dynamic Scene"
+        - "reactive — Reactive Simulation"
+        - "egotraj — Following Ego Vehicle Trajectory"
+        - "sync — 자사 데이터 Sensor 동기화"
+        - "metrics — Metrics-based Evaluation"
+        - "speed — Simulation Speed"
+        - "render — Rendering Quality"
+        - "e2ecmp — E2E Model Comparison 환경"
+        - "sim2real — Sim-to-Real gap 최소화"
+        - "latency — E2E Inference-to-Actuation Latency 동기화"
+        - "scengen — Scenario Generation"
+        - "scenmine — Scenario Mining"
+        - "edit — Driving Scene Editing"
+        - "multiagent — Multi-Agent Simulation"
+        - "rqi — Reconstruction Quality Improvement"
+        - "gcomp — Gaussian Compression"
+        - "sensorplat — Sensor Integration Platform"
+        - "wm — World Model"
+        - "ref_gaia4 — GAIA-4 (참고자료)"
+    validations: { required: true }
+  - type: dropdown
+    id: paper_tag
+    attributes: { label: 분류, options: ["일반", "참고자료"] }
+  - type: textarea
+    id: paper_note
+    attributes: { label: 이 항목과의 관련성, description: "한두 문장으로 무엇을 해결하는지" }
+    validations: { required: true }
