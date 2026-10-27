@@ -885,5 +885,18 @@
       "wm",
       "ref_gaia4"
     ]
+  },
+  {
+    "id": "safetycriticaltrafficsim",
+    "title": "Safety-Critical Traffic Simulation with Guided Latent Diffusion Model",
+    "venue": "2025",
+    "url": "https://arxiv.org/abs/2505.00515",
+    "note": "guided latent diffusion으로 물리적으로 그럴듯한 적대적 안전임계 시나리오를 생성하고 closed-loop로 검증.",
+    "tag": "",
+    "nodes": [
+      "scengen"
+    ],
+    "added_by": "yscompany18-star",
+    "issue": 1
   }
 ]
